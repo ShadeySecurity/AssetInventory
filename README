@@ -1,0 +1,2 @@
+More details coming. 
+This is a web2py application, but please note you will need to run web2py through apache and run apache as root or give nmap SUID privs to run it's OS detection without root.
