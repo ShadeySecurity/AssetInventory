@@ -1,0 +1,21 @@
+(dp1
+S'output'
+p2
+S"<type 'exceptions.UnboundLocalError'> local variable 'results' referenced before assignment"
+p3
+sS'layer'
+p4
+S'/home/www-data/web2py/applications/SimpleAssetInventory/controllers/default.py'
+p5
+sS'code'
+p6
+S'# -*- coding: utf-8 -*-\n# this file is released under public domain and you can use without limitations\n\n# -------------------------------------------------------------------------\n# This is a sample controller\n# - index is the default action of any application\n# - user is required for authentication and authorization\n# - download is for downloading files uploaded in the db (does streaming)\n# -------------------------------------------------------------------------\nfrom nmapscanner import *\n\ndef index():\n    """\n    example action using the internationalization operator T and flash\n    rendered by views/default/index.html or views/generic.html\n\n    if you need a simple wiki simply replace the two lines below with:\n    return auth.wiki()\n    """\n    response.flash = T("Please sign up.")\n    return dict(message=T(\'Welcome to our scripting server!\'))\n\n\ndef user():\n    """\n    exposes:\n    http://..../[app]/default/user/login\n    http://..../[app]/default/user/logout\n    http://..../[app]/default/user/register\n    http://..../[app]/default/user/profile\n    http://..../[app]/default/user/retrieve_password\n    http://..../[app]/default/user/change_password\n    http://..../[app]/default/user/bulk_register\n    use @auth.requires_login()\n        @auth.requires_membership(\'group name\')\n        @auth.requires_permission(\'read\',\'table name\',record_id)\n    to decorate functions that need access control\n    also notice there is http://..../[app]/appadmin/manage/auth to allow administrator to manage users\n    """\n    return dict(form=auth())\n\n\n@cache.action()\ndef download():\n    """\n    allows downloading of uploaded files\n    http://..../[app]/default/download/[filename]\n    """\n    return response.download(request, db)\n\n\ndef call():\n    """\n    exposes services. for example:\n    http://..../[app]/default/call/jsonrpc\n    decorate with @services.jsonrpc the functions to expose\n    supports xml, json, xmlrpc, jsonrpc, amfrpc, rss, csv\n    """\n    return service()\n\n@auth.requires_login()\ndef audit():\n    # TODO\n    return \n@auth.requires_login()\ndef results():\n    #TODO\n    return \n\n@auth.requires_login()\n@auth.requires_membership(\'execute\')\ndef execute():\n    try:\n        if request.vars.execute and request.vars.network and request.vars.speed and request.vars.justification:\n            if len(request.vars.network) > 0 and len(request.vars.speed) > 0 and len(request.vars.justification) > 0:\n                speedopts = ["0","1","2","3","4","5"]\n                if request.vars.speed in speedopts:\n                    response.flash = T(\'Thanks! The form has been submitted.\')\n                    sleep(4)\n                    options = "-T "\n                    options += str(request.vars.speed)\n                    options += str(request.vars.custom)\n                    results = SuperScan.standardscan(str(request.vars.network), options)\n                else:\n                    response.flash = T(\'Thanks, but you gave us a bad speed! 0-5 please!\')\n            else:\n                response.flash = T(\'Try again - no fields can be empty.\')\n    except Exception as err:\n        response.flash = T(err)\n    return results\n\nresponse._vars=response._caller(execute)\n'
+p7
+sS'snapshot'
+p8
+(dp9
+sS'traceback'
+p10
+S'Traceback (most recent call last):\n  File "/home/www-data/web2py/gluon/restricted.py", line 227, in restricted\n    exec ccode in environment\n  File "/home/www-data/web2py/applications/SimpleAssetInventory/controllers/default.py", line 92, in <module>\n  File "/home/www-data/web2py/gluon/globals.py", line 417, in <lambda>\n    self._caller = lambda f: f()\n  File "/home/www-data/web2py/gluon/tools.py", line 4241, in f\n    return action(*a, **b)\n  File "/home/www-data/web2py/gluon/tools.py", line 4241, in f\n    return action(*a, **b)\n  File "/home/www-data/web2py/applications/SimpleAssetInventory/controllers/default.py", line 90, in execute\n    return results\nUnboundLocalError: local variable \'results\' referenced before assignment\n'
+p11
+s.

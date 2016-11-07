@@ -1,0 +1,703 @@
+(dp1
+S'output'
+p2
+S"<class 'sqlite3.OperationalError'> database is locked"
+p3
+sS'layer'
+p4
+S'/home/www-data/web2py/applications/SimpleAssetInventory/controllers/default.py'
+p5
+sS'code'
+p6
+S'# -*- coding: utf-8 -*-\n# this file is released under public domain and you can use without limitations\n\n# -------------------------------------------------------------------------\n# This is a sample controller\n# - index is the default action of any application\n# - user is required for authentication and authorization\n# - download is for downloading files uploaded in the db (does streaming)\n# -------------------------------------------------------------------------\nfrom nmapscanner import *\n\ndef index():\n    """\n    example action using the internationalization operator T and flash\n    rendered by views/default/index.html or views/generic.html\n\n    if you need a simple wiki simply replace the two lines below with:\n    return auth.wiki()\n    """\n    response.flash = T("Please sign up.")\n    return dict(message=T(\'Welcome to our scripting server!\'))\n\n\ndef user():\n    """\n    exposes:\n    http://..../[app]/default/user/login\n    http://..../[app]/default/user/logout\n    http://..../[app]/default/user/register\n    http://..../[app]/default/user/profile\n    http://..../[app]/default/user/retrieve_password\n    http://..../[app]/default/user/change_password\n    http://..../[app]/default/user/bulk_register\n    use @auth.requires_login()\n        @auth.requires_membership(\'group name\')\n        @auth.requires_permission(\'read\',\'table name\',record_id)\n    to decorate functions that need access control\n    also notice there is http://..../[app]/appadmin/manage/auth to allow administrator to manage users\n    """\n    return dict(form=auth())\n\n\n@cache.action()\ndef download():\n    """\n    allows downloading of uploaded files\n    http://..../[app]/default/download/[filename]\n    """\n    return response.download(request, db)\n\n\ndef call():\n    """\n    exposes services. for example:\n    http://..../[app]/default/call/jsonrpc\n    decorate with @services.jsonrpc the functions to expose\n    supports xml, json, xmlrpc, jsonrpc, amfrpc, rss, csv\n    """\n    return service()\n\n@auth.requires_login()\n@auth.requires_membership(\'auditor\')\ndef audit():\n    grid = SQLFORM.smartgrid(db.auditexecute, headers={\'auditexecute.execoptions\':\'Standard Options Selected\',\'auditexecute.advancedCMDS\':\'Advanced Options Selected\',\'auditexecute.Identifier\':\'Task Identifier\'}, deletable=False, create=False, csv=True, editable=False)\n    return locals()\n    return dict(form=form)\n@auth.requires_login()\ndef results():\n    grid = SQLFORM.grid(db.results, editable=False, deletable=False, headers={\'results.ip\':\'IP\',\'results.netbios\':\'NetBIOS Hostname\',\'results.first_timestamp\':\'First Seen\',\'results.last_timestamp\':\'Last Seen\',\'results.dns\':\'DNS Hostname\',\'results.os\':\'Operating System\'})\n    return locals()\n    return dict(form=form)\n\n@auth.requires_login()\n@auth.requires_membership(\'editor\')\ndef editresults():\n    grid = SQLFORM.smartgrid(db.results, headers={\'results.ip\':\'IP\',\'results.netbios\':\'NetBIOS Hostname\',\'results.first_timestamp\':\'First Seen\',\'results.last_timestamp\':\'Last Seen\',\'results.dns\':\'DNS Hostname\',\'results.os\':\'Operating System\'})\n    return locals()\n    return dict(form=form)\n\n@auth.requires_login()\n@auth.requires_membership(\'execute\')\ndef execute():\n    from  datetime import datetime\n    results = "herro!"\n    try:\n        form = SQLFORM(db.auditexecute, record=None,\n            deletable=False, linkto=None,\n            upload=None, fields = None, labels = {\'network\':\'Your network address or IP\',\'execoptions\':\'Options\',\'advancedCMDS\':"Advanced Commands",\'Identifier\':\'Task Identifier\'},\n            col3={}, submit_button=\'Submit\',\n            delete_label=\'Check to delete:\',\n            showid=True, readonly=False,\n            comments=True, keepopts=[],\n            ignore_rw=False, record_id=None,\n            formstyle=\'table3cols\',\n            buttons=[\'submit\'], separator=\': \')\n        if form.process().accepted:\n            if len(form.vars.network) > 0 and len(form.vars.speed) > 0 and len(form.vars.justification) > 0:\n                speedopts = ["1","2","3","4","5"]\n                if form.vars.speed in speedopts:\n                    response.flash = T(\'Thanks! The form has been submitted.\')\n                    options = " -T "\n                    options += str(form.vars.speed)\n                    if "Get Hostname" in form.vars.execoptions:\n                        options += "--script nbstat.nse"\n                    elif "Get OS" in form.vars.execoptions:\n                        options += " -O"\n                    elif "Get ALL" in form.vars.execoptions:\n                        options += " -A"\n                    else:\n                        response.flash = "You selected no standard options! Welcome to 1337 land. You selected %s" % form.vars.execoptions\n                    options += " "\n                    options += str(form.vars.advancedCMDS)\n                    network =  str(form.vars.network)\n                    fileopts = str(form.vars.results_location)\n                    scan = SuperScan()\n                    scan.scan(network,options)\n                    scanresults = scan.out_struct()\n                    for result in scanresults:\n                        scanports = \'\'.join(result[\'ports\'])\n                        success = db(db.results.ip == result[\'ip\']).update(ports=result[\'ports\'],os=result[\'os\'],dns=result[\'dns\'],netbios=result[\'netbios\'],last_timestamp=str(datetime.now()))\n                        if success:\n                            response.flash = "Data has been updated!"\n                        else:\n                            success = db.results.insert(ip=result[\'ip\'],ports=result[\'ports\'],os=result[\'os\'],dns=result[\'dns\'],netbios=result[\'netbios\'],first_timestamp=str(datetime.now()),last_timestamp=str(datetime.now()))\n                else:\n                    response.flash = T(\'Thanks, but you gave us a bad speed! 0-5 please!\')\n            else:\n                response.flash = T(\'Try again - no fields can be empty.\')\n            response.flash = "Thanks for scanning! Your results are now in the results database!"\n        else:\n            helloworld = 1\n        return dict(form=form)\n    except Exception as err:\n        response.flash = "Critical Error: %s" % err\n    return dict(form=form)\n\nresponse._vars=response._caller(user)\n'
+p7
+sS'snapshot'
+p8
+(dp9
+S'exception'
+p10
+(dp11
+S'__module__'
+p12
+S"'sqlite3'"
+p13
+sS'__getslice__'
+p14
+S"<method-wrapper '__getslice__' of OperationalError object>"
+p15
+sS'__str__'
+p16
+S"<method-wrapper '__str__' of OperationalError object>"
+p17
+sS'__reduce__'
+p18
+S'<built-in method __reduce__ of OperationalError object>'
+p19
+sS'__dict__'
+p20
+S'{}'
+p21
+sS'__sizeof__'
+p22
+S'<built-in method __sizeof__ of OperationalError object>'
+p23
+sS'__weakref__'
+p24
+S'None'
+p25
+sS'__init__'
+p26
+S"<method-wrapper '__init__' of OperationalError object>"
+p27
+sS'__setattr__'
+p28
+S"<method-wrapper '__setattr__' of OperationalError object>"
+p29
+sS'__reduce_ex__'
+p30
+S'<built-in method __reduce_ex__ of OperationalError object>'
+p31
+sS'__new__'
+p32
+S'<built-in method __new__ of type object>'
+p33
+sS'__format__'
+p34
+S'<built-in method __format__ of OperationalError object>'
+p35
+sS'__class__'
+p36
+S"<class 'sqlite3.OperationalError'>"
+p37
+sS'__doc__'
+p38
+S'None'
+p39
+sS'__getitem__'
+p40
+S"<method-wrapper '__getitem__' of OperationalError object>"
+p41
+sS'__setstate__'
+p42
+S'<built-in method __setstate__ of OperationalError object>'
+p43
+sS'__getattribute__'
+p44
+S"<method-wrapper '__getattribute__' of OperationalError object>"
+p45
+sS'args'
+p46
+S"('database is locked',)"
+p47
+sS'__subclasshook__'
+p48
+S'<built-in method __subclasshook__ of type object>'
+p49
+sS'__unicode__'
+p50
+S'<built-in method __unicode__ of OperationalError object>'
+p51
+sS'__delattr__'
+p52
+S"<method-wrapper '__delattr__' of OperationalError object>"
+p53
+sS'__repr__'
+p54
+S"<method-wrapper '__repr__' of OperationalError object>"
+p55
+sS'__hash__'
+p56
+S"<method-wrapper '__hash__' of OperationalError object>"
+p57
+ssS'evalue'
+p58
+S'database is locked'
+p59
+sS'request'
+p60
+cgluon.html
+XML_unpickle
+p61
+(S's>n\x00\x00<div><table><tr><td style="font-weight:bold;vertical-align:top;">ajax</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">application</td><td style="vertical-align:top;">:</td><td><div>SimpleAssetInventory</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">args</td><td style="vertical-align:top;">:</td><td><div><table><tr><td><div>profile</div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">cid</td><td style="vertical-align:top;">:</td><td><div>None</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">client</td><td style="vertical-align:top;">:</td><td><div>10.1.10.24</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">controller</td><td style="vertical-align:top;">:</td><td><div>default</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">cookies</td><td style="vertical-align:top;">:</td><td><div><table><tr><td style="font-weight:bold;vertical-align:top;">session_id_admin</td><td style="vertical-align:top;">:</td><td><div>10.1.10.24-e66014e5-18dc-4df9-9300-add1ee5b65c3<table><tr><td style="font-weight:bold;vertical-align:top;">comment</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">domain</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">expires</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">httponly</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">max-age</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">path</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">secure</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">version</td><td style="vertical-align:top;">:</td><td><div></div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_id_simpleassetinventory</td><td style="vertical-align:top;">:</td><td><div>10.1.10.24-32763fd8-a379-44a4-b479-5db5e42c10ff<table><tr><td style="font-weight:bold;vertical-align:top;">comment</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">domain</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">expires</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">httponly</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">max-age</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">path</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">secure</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">version</td><td style="vertical-align:top;">:</td><td><div></div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_id_welcome</td><td style="vertical-align:top;">:</td><td><div>10.1.10.24-04f46aa8-4a84-4954-82c2-3cfd56b5390c<table><tr><td style="font-weight:bold;vertical-align:top;">comment</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">domain</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">expires</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">httponly</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">max-age</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">path</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">secure</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">version</td><td style="vertical-align:top;">:</td><td><div></div></td></tr></table></div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">env</td><td style="vertical-align:top;">:</td><td><div><table><tr><td style="font-weight:bold;vertical-align:top;">CONTENT_LENGTH</td><td style="vertical-align:top;">:</td><td><div>1059</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">CONTENT_TYPE</td><td style="vertical-align:top;">:</td><td><div>multipart/form-data; boundary=---------------------------9601378781947936988226848683</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">CONTEXT_DOCUMENT_ROOT</td><td style="vertical-align:top;">:</td><td><div>/var/www</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">CONTEXT_PREFIX</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">DOCUMENT_ROOT</td><td style="vertical-align:top;">:</td><td><div>/var/www</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">GATEWAY_INTERFACE</td><td style="vertical-align:top;">:</td><td><div>CGI/1.1</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">HTTP_ACCEPT</td><td style="vertical-align:top;">:</td><td><div>text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">HTTP_ACCEPT_ENCODING</td><td style="vertical-align:top;">:</td><td><div>gzip, deflate, br</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">HTTP_ACCEPT_LANGUAGE</td><td style="vertical-align:top;">:</td><td><div>en-US,en;q=0.5</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">HTTP_CONNECTION</td><td style="vertical-align:top;">:</td><td><div>keep-alive</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">HTTP_COOKIE</td><td style="vertical-align:top;">:</td><td><div>session_id_welcome=10.1.10.24-04f46aa8-4a84-4954-82c2-3cfd56b5390c; session_id_simpleassetinventory=10.1.10.24-32763fd8-a379-44a4-b479-5db5e42c10ff; session_id_admin=10.1.10.24-e66014e5-18dc-4df9-9300-add1ee5b65c3</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">HTTP_HOST</td><td style="vertical-align:top;">:</td><td><div>10.1.10.250</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">HTTP_REFERER</td><td style="vertical-align:top;">:</td><td><div>https://10.1.10.250/SimpleAssetInventory/default/user/profile?_next=/SimpleAssetInventory/default/execute</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">HTTP_UPGRADE_INSECURE_REQUESTS</td><td style="vertical-align:top;">:</td><td><div>1</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">HTTP_USER_AGENT</td><td style="vertical-align:top;">:</td><td><div>Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:49.0) Gecko/20100101 Firefox/49.0</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">PATH_INFO</td><td style="vertical-align:top;">:</td><td><div>/SimpleAssetInventory/default/user/profile</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">PATH_TRANSLATED</td><td style="vertical-align:top;">:</td><td><div>/home/www-data/web2py/wsgihandler.py/SimpleAssetInventory/default/user/profile</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">QUERY_STRING</td><td style="vertical-align:top;">:</td><td><div>_next=/SimpleAssetInventory/default/execute</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">REMOTE_ADDR</td><td style="vertical-align:top;">:</td><td><div>10.1.10.24</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">REMOTE_PORT</td><td style="vertical-align:top;">:</td><td><div>60858</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">REQUEST_METHOD</td><td style="vertical-align:top;">:</td><td><div>POST</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">REQUEST_SCHEME</td><td style="vertical-align:top;">:</td><td><div>https</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">REQUEST_URI</td><td style="vertical-align:top;">:</td><td><div>/SimpleAssetInventory/default/user/profile?_next=/SimpleAssetInventory/default/execute</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">SCRIPT_FILENAME</td><td style="vertical-align:top;">:</td><td><div>/home/www-data/web2py/wsgihandler.py</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">SCRIPT_NAME</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">SERVER_ADDR</td><td style="vertical-align:top;">:</td><td><div>10.1.10.250</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">SERVER_ADMIN</td><td style="vertical-align:top;">:</td><td><div>[no address given]</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">SERVER_NAME</td><td style="vertical-align:top;">:</td><td><div>10.1.10.250</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">SERVER_PORT</td><td style="vertical-align:top;">:</td><td><div>443</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">SERVER_PROTOCOL</td><td style="vertical-align:top;">:</td><td><div>HTTP/1.1</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">SERVER_SIGNATURE</td><td style="vertical-align:top;">:</td><td><div>&lt;address&gt;Apache/2.4.7 (Ubuntu) Server at 10.1.10.250 Port 443&lt;/address&gt;\n</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">SERVER_SOFTWARE</td><td style="vertical-align:top;">:</td><td><div>Apache/2.4.7 (Ubuntu)</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">app_folders</td><td style="vertical-align:top;">:</td><td><div>set([&#x27;/home/www-data/web2py/applications/welcome/&#x27;, &#x27;/home/www-data/web2py/applications/SimpleAssetInventory/&#x27;, &#x27;/home/www-data/web2py/applications/admin/&#x27;])</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">applications_parent</td><td style="vertical-align:top;">:</td><td><div>/home/www-data/web2py</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">content_length</td><td style="vertical-align:top;">:</td><td><div>1059</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">content_type</td><td style="vertical-align:top;">:</td><td><div>multipart/form-data; boundary=---------------------------9601378781947936988226848683</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">context_document_root</td><td style="vertical-align:top;">:</td><td><div>/var/www</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">context_prefix</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">db_sessions</td><td style="vertical-align:top;">:</td><td><div>set([])</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">debugging</td><td style="vertical-align:top;">:</td><td><div>True</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">document_root</td><td style="vertical-align:top;">:</td><td><div>/var/www</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">gateway_interface</td><td style="vertical-align:top;">:</td><td><div>CGI/1.1</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">gluon_parent</td><td style="vertical-align:top;">:</td><td><div>/home/www-data/web2py</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">http_accept</td><td style="vertical-align:top;">:</td><td><div>text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">http_accept_encoding</td><td style="vertical-align:top;">:</td><td><div>gzip, deflate, br</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">http_accept_language</td><td style="vertical-align:top;">:</td><td><div>en-US,en;q=0.5</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">http_connection</td><td style="vertical-align:top;">:</td><td><div>keep-alive</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">http_cookie</td><td style="vertical-align:top;">:</td><td><div>session_id_welcome=10.1.10.24-04f46aa8-4a84-4954-82c2-3cfd56b5390c; session_id_simpleassetinventory=10.1.10.24-32763fd8-a379-44a4-b479-5db5e42c10ff; session_id_admin=10.1.10.24-e66014e5-18dc-4df9-9300-add1ee5b65c3</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">http_host</td><td style="vertical-align:top;">:</td><td><div>10.1.10.250</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">http_referer</td><td style="vertical-align:top;">:</td><td><div>https://10.1.10.250/SimpleAssetInventory/default/user/profile?_next=/SimpleAssetInventory/default/execute</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">http_upgrade_insecure_requests</td><td style="vertical-align:top;">:</td><td><div>1</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">http_user_agent</td><td style="vertical-align:top;">:</td><td><div>Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:49.0) Gecko/20100101 Firefox/49.0</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">is_jython</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">is_pypy</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">is_source</td><td style="vertical-align:top;">:</td><td><div>True</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">local_hosts</td><td style="vertical-align:top;">:</td><td><div><table><tr><td><div>10.130.31.189</div></td></tr><tr><td><div>deteriorative-ena</div></td></tr><tr><td><div>::ffff:127.0.0.1</div></td></tr><tr><td><div>::1</div></td></tr><tr><td><div>localhost</div></td></tr><tr><td><div>127.0.0.1</div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">mod_wsgi.application_group</td><td style="vertical-align:top;">:</td><td><div>127.0.0.1|</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">mod_wsgi.callable_object</td><td style="vertical-align:top;">:</td><td><div>application</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">mod_wsgi.enable_sendfile</td><td style="vertical-align:top;">:</td><td><div>0</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">mod_wsgi.handler_script</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">mod_wsgi.input_chunked</td><td style="vertical-align:top;">:</td><td><div>0</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">mod_wsgi.listener_host</td><td style="vertical-align:top;">:</td><td><div>0.0.0.0</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">mod_wsgi.listener_port</td><td style="vertical-align:top;">:</td><td><div>443</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">mod_wsgi.process_group</td><td style="vertical-align:top;">:</td><td><div>web2py</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">mod_wsgi.queue_start</td><td style="vertical-align:top;">:</td><td><div>1477087261437961</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">mod_wsgi.request_handler</td><td style="vertical-align:top;">:</td><td><div>wsgi-script</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">mod_wsgi.script_reloading</td><td style="vertical-align:top;">:</td><td><div>1</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">mod_wsgi.version</td><td style="vertical-align:top;">:</td><td><div><table><tr><td><div>3</div></td></tr><tr><td><div>4</div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">mod_wsgi_application_group</td><td style="vertical-align:top;">:</td><td><div>127.0.0.1|</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">mod_wsgi_callable_object</td><td style="vertical-align:top;">:</td><td><div>application</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">mod_wsgi_enable_sendfile</td><td style="vertical-align:top;">:</td><td><div>0</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">mod_wsgi_handler_script</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">mod_wsgi_input_chunked</td><td style="vertical-align:top;">:</td><td><div>0</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">mod_wsgi_listener_host</td><td style="vertical-align:top;">:</td><td><div>0.0.0.0</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">mod_wsgi_listener_port</td><td style="vertical-align:top;">:</td><td><div>443</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">mod_wsgi_process_group</td><td style="vertical-align:top;">:</td><td><div>web2py</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">mod_wsgi_queue_start</td><td style="vertical-align:top;">:</td><td><div>1477087261437961</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">mod_wsgi_request_handler</td><td style="vertical-align:top;">:</td><td><div>wsgi-script</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">mod_wsgi_script_reloading</td><td style="vertical-align:top;">:</td><td><div>1</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">mod_wsgi_version</td><td style="vertical-align:top;">:</td><td><div><table><tr><td><div>3</div></td></tr><tr><td><div>4</div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">path_info</td><td style="vertical-align:top;">:</td><td><div>/SimpleAssetInventory/default/user/profile</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">path_translated</td><td style="vertical-align:top;">:</td><td><div>/home/www-data/web2py/wsgihandler.py/SimpleAssetInventory/default/user/profile</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">query_string</td><td style="vertical-align:top;">:</td><td><div>_next=/SimpleAssetInventory/default/execute</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">remote_addr</td><td style="vertical-align:top;">:</td><td><div>10.1.10.24</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">remote_port</td><td style="vertical-align:top;">:</td><td><div>60858</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">request_method</td><td style="vertical-align:top;">:</td><td><div>POST</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">request_scheme</td><td style="vertical-align:top;">:</td><td><div>https</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">request_uri</td><td style="vertical-align:top;">:</td><td><div>/SimpleAssetInventory/default/user/profile?_next=/SimpleAssetInventory/default/execute</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">script_filename</td><td style="vertical-align:top;">:</td><td><div>/home/www-data/web2py/wsgihandler.py</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">script_name</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">server_addr</td><td style="vertical-align:top;">:</td><td><div>10.1.10.250</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">server_admin</td><td style="vertical-align:top;">:</td><td><div>[no address given]</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">server_name</td><td style="vertical-align:top;">:</td><td><div>10.1.10.250</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">server_port</td><td style="vertical-align:top;">:</td><td><div>443</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">server_protocol</td><td style="vertical-align:top;">:</td><td><div>HTTP/1.1</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">server_signature</td><td style="vertical-align:top;">:</td><td><div>&lt;address&gt;Apache/2.4.7 (Ubuntu) Server at 10.1.10.250 Port 443&lt;/address&gt;\n</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">server_software</td><td style="vertical-align:top;">:</td><td><div>Apache/2.4.7 (Ubuntu)</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">web2py_path</td><td style="vertical-align:top;">:</td><td><div>/home/www-data/web2py</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">web2py_version</td><td style="vertical-align:top;">:</td><td><div>2.14.6-stable+timestamp.2016.05.10.00.21.47</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi.errors</td><td style="vertical-align:top;">:</td><td><div>&lt;mod_wsgi.Log object at 0x7f16d9e67a30&gt;</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi.file_wrapper</td><td style="vertical-align:top;">:</td><td><div>&lt;built-in method file_wrapper of mod_wsgi.Adapter object at 0x7f16d9669378&gt;</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi.input</td><td style="vertical-align:top;">:</td><td><div>&lt;mod_wsgi.Input object at 0x7f16d9e679b0&gt;</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi.multiprocess</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi.multithread</td><td style="vertical-align:top;">:</td><td><div>True</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi.run_once</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi.url_scheme</td><td style="vertical-align:top;">:</td><td><div>https</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi.version</td><td style="vertical-align:top;">:</td><td><div><table><tr><td><div>1</div></td></tr><tr><td><div>0</div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi_errors</td><td style="vertical-align:top;">:</td><td><div>&lt;mod_wsgi.Log object at 0x7f16d9e67a30&gt;</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi_file_wrapper</td><td style="vertical-align:top;">:</td><td><div>&lt;built-in method file_wrapper of mod_wsgi.Adapter object at 0x7f16d9669378&gt;</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi_input</td><td style="vertical-align:top;">:</td><td><div>&lt;mod_wsgi.Input object at 0x7f16d9e679b0&gt;</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi_multiprocess</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi_multithread</td><td style="vertical-align:top;">:</td><td><div>True</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi_run_once</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi_url_scheme</td><td style="vertical-align:top;">:</td><td><div>https</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi_version</td><td style="vertical-align:top;">:</td><td><div><table><tr><td><div>1</div></td></tr><tr><td><div>0</div></td></tr></table></div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">extension</td><td style="vertical-align:top;">:</td><td><div>html</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">folder</td><td style="vertical-align:top;">:</td><td><div>/home/www-data/web2py/applications/SimpleAssetInventory/</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">function</td><td style="vertical-align:top;">:</td><td><div>user</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">global_settings</td><td style="vertical-align:top;">:</td><td><div><table><tr><td style="font-weight:bold;vertical-align:top;">app_folders</td><td style="vertical-align:top;">:</td><td><div>set([&#x27;/home/www-data/web2py/applications/welcome/&#x27;, &#x27;/home/www-data/web2py/applications/SimpleAssetInventory/&#x27;, &#x27;/home/www-data/web2py/applications/admin/&#x27;])</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">applications_parent</td><td style="vertical-align:top;">:</td><td><div>/home/www-data/web2py</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">db_sessions</td><td style="vertical-align:top;">:</td><td><div>set([])</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">debugging</td><td style="vertical-align:top;">:</td><td><div>True</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">gluon_parent</td><td style="vertical-align:top;">:</td><td><div>/home/www-data/web2py</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">is_jython</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">is_pypy</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">is_source</td><td style="vertical-align:top;">:</td><td><div>True</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">local_hosts</td><td style="vertical-align:top;">:</td><td><div><table><tr><td><div>10.130.31.189</div></td></tr><tr><td><div>deteriorative-ena</div></td></tr><tr><td><div>::ffff:127.0.0.1</div></td></tr><tr><td><div>::1</div></td></tr><tr><td><div>localhost</div></td></tr><tr><td><div>127.0.0.1</div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">web2py_version</td><td style="vertical-align:top;">:</td><td><div>2.14.6-stable+timestamp.2016.05.10.00.21.47</div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">is_https</td><td style="vertical-align:top;">:</td><td><div>True</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">is_local</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">is_restful</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">is_scheduler</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">is_shell</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">now</td><td style="vertical-align:top;">:</td><td><div>datetime.datetime(2016, 10, 21, 22, 1, 1, 438474)</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">raw_args</td><td style="vertical-align:top;">:</td><td><div>profile</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">raw_extension</td><td style="vertical-align:top;">:</td><td><div>None</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">url</td><td style="vertical-align:top;">:</td><td><div>/SimpleAssetInventory/default/user/profile</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">utcnow</td><td style="vertical-align:top;">:</td><td><div>datetime.datetime(2016, 10, 21, 22, 1, 1, 438493)</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">wsgi</td><td style="vertical-align:top;">:</td><td><div>&lt;gluon.main.LazyWSGI object at 0x7f16d9358a10&gt;</div></td></tr></table></div>'
+tRp62
+sS'frames'
+p63
+(lp64
+(dp65
+S'file'
+p66
+S'/home/www-data/web2py/gluon/restricted.py'
+p67
+sS'dump'
+p68
+(dp69
+S'environment'
+p70
+S"{'A': <class 'gluon.html.A'>, 'ANY_OF': <class 'gluon.validators.ANY_OF'>, 'ASSIGNJS': <function ASSIGNJS>, 'AppConfig': <function AppConfig>, 'Auth': <class 'gluon.tools.Auth'>, 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'BUTTON': <class 'gluon.html.BUTTON'>, ...}"
+p71
+sS'ccode'
+p72
+S'<code object <module> at 0x7f16d9b2f4b0, file "/...eAssetInventory/controllers/default.py", line 10>'
+p73
+ssS'lnum'
+p74
+I227
+sS'lines'
+p75
+(dp76
+I224
+S'            ccode = code'
+p77
+sI225
+S'        else:'
+p78
+sI226
+S'            ccode = compile2(code, layer)'
+p79
+sI227
+S'        exec ccode in environment'
+p80
+sI228
+S'    except HTTP:'
+p81
+sI229
+S'        raise'
+p82
+sI230
+S'    except RestrictedError:'
+p83
+sI231
+S'        # do not encapsulate (obfuscate) the original RestrictedError'
+p84
+sI222
+S'    try:'
+p85
+sI223
+S'        if isinstance(code, types.CodeType):'
+p86
+ssS'call'
+p87
+S"(code='# -*- coding: utf-8 -*-\\n# this file is released ...orm=form)\\n\\nresponse._vars=response._caller(user)\\n', environment={'A': <class 'gluon.html.A'>, 'ANY_OF': <class 'gluon.validators.ANY_OF'>, 'ASSIGNJS': <function ASSIGNJS>, 'AppConfig': <function AppConfig>, 'Auth': <class 'gluon.tools.Auth'>, 'B': <class 'gluon.html.B'>, 'BEAUTIFY': <class 'gluon.html.BEAUTIFY'>, 'BODY': <class 'gluon.html.BODY'>, 'BR': <class 'gluon.html.BR'>, 'BUTTON': <class 'gluon.html.BUTTON'>, ...}, layer='/home/www-data/web2py/applications/SimpleAssetInventory/controllers/default.py')"
+p88
+sS'func'
+p89
+S'restricted'
+p90
+sa(dp91
+g66
+S'/home/www-data/web2py/applications/SimpleAssetInventory/controllers/default.py'
+p92
+sg68
+(dp93
+sg74
+I137
+sg75
+(dp94
+I128
+S"                response.flash = T('Try again - no fields can be empty.')"
+p95
+sI129
+S'            response.flash = "Thanks for scanning! Your results are now in the results database!"'
+p96
+sI130
+S'        else:'
+p97
+sI131
+S'            helloworld = 1'
+p98
+sI132
+S'        return dict(form=form)'
+p99
+sI133
+S'    except Exception as err:'
+p100
+sI134
+S'        response.flash = "Critical Error: %s" % err'
+p101
+sI135
+S'    return dict(form=form)'
+p102
+sI126
+S"                    response.flash = T('Thanks, but you gave us a bad speed! 0-5 please!')"
+p103
+sI127
+S'            else:'
+p104
+ssg87
+S'()'
+p105
+sg89
+S'<module>'
+p106
+sa(dp107
+g66
+S'/home/www-data/web2py/gluon/globals.py'
+p108
+sg68
+(dp109
+S'self'
+p110
+S'undefined'
+p111
+sS'f'
+S'<function user>'
+p112
+ssg74
+I417
+sg75
+(dp113
+I416
+S'        self._vars = None'
+p114
+sI417
+S'        self._caller = lambda f: f()'
+p115
+sI418
+S'        self._view_environment = None'
+p116
+sI419
+S'        self._custom_commit = None'
+p117
+sI420
+S'        self._custom_rollback = None'
+p118
+sI421
+S"        self.generic_patterns = ['*']"
+p119
+sI412
+S"        self.flash = ''            # used by the default view layout"
+p120
+sI413
+S'        self.meta = Storage()      # used by web2py_ajax.html'
+p121
+sI414
+S'        self.menu = []             # used by the default view layout'
+p122
+sI415
+S'        self.files = []            # used by web2py_ajax.html'
+p123
+ssg87
+S'(f=<function user>)'
+p124
+sg89
+S'<lambda>'
+p125
+sa(dp126
+g66
+S'/home/www-data/web2py/applications/SimpleAssetInventory/controllers/default.py'
+p127
+sg68
+(dp128
+S'global auth'
+p129
+S'<gluon.tools.Auth object>'
+p130
+sS'form'
+p131
+g111
+sS'builtindict'
+p132
+S"<type 'dict'>"
+p133
+ssg74
+I40
+sg75
+(dp134
+I35
+S"        @auth.requires_membership('group name')"
+p135
+sI36
+S"        @auth.requires_permission('read','table name',record_id)"
+p136
+sI37
+S'    to decorate functions that need access control'
+p137
+sI38
+S'    also notice there is http://..../[app]/appadmin/manage/auth to allow administrator to manage users'
+p138
+sI39
+S'    """'
+p139
+sI40
+S'    return dict(form=auth())'
+p140
+sI41
+S''
+sI42
+S''
+sI43
+S'@cache.action()'
+p141
+sI44
+S'def download():'
+p142
+ssg87
+S'()'
+p143
+sg89
+S'user'
+p144
+sa(dp145
+g66
+S'/home/www-data/web2py/gluon/tools.py'
+p146
+sg68
+(dp147
+S'self'
+p148
+S'<gluon.tools.Auth object>'
+p149
+sS'args'
+p150
+S"['profile']"
+p151
+sS'builtingetattr'
+p152
+S'<built-in function getattr>'
+p153
+ssg74
+I1941
+sg75
+(dp154
+I1936
+S"                       'impersonate', 'not_authorized', 'confirm_registration',"
+p155
+sI1937
+S"                       'bulk_register', 'manage_tokens', 'jwt'):"
+p156
+sI1938
+S"            if len(request.args) >= 2 and args[0] == 'impersonate':"
+p157
+sI1939
+S'                return getattr(self, args[0])(request.args[1])'
+p158
+sI1940
+S'            else:'
+p159
+sI1941
+S'                return getattr(self, args[0])()'
+p160
+sI1942
+S"        elif args[0] == 'cas' and not self.settings.cas_provider:"
+p161
+sI1943
+S"            if args(1) == self.settings.cas_actions['login']:"
+p162
+sI1944
+S'                return self.cas_login(version=2)'
+p163
+sI1945
+S"            elif args(1) == self.settings.cas_actions['validate']:"
+p164
+ssg87
+S'(self=<gluon.tools.Auth object>)'
+p165
+sg89
+S'__call__'
+p166
+sa(dp167
+g66
+S'/home/www-data/web2py/gluon/tools.py'
+p168
+sg68
+(dp169
+S'self'
+p170
+S'<gluon.tools.Auth object>'
+p171
+sS'hideerror'
+p172
+g111
+sS'self.settings.hideerror'
+p173
+S'False'
+p174
+sS'self.settings'
+p175
+S"<Storage {'verify_email_onaccept': [], 'register...me_next': '/SimpleAssetInventory/default/index'}>"
+p176
+ssg74
+I4026
+sg75
+(dp177
+I4021
+S'            deletable=self.settings.allow_delete_accounts,'
+p178
+sI4022
+S'            )'
+p179
+sI4023
+S'        if form.accepts(request, session,'
+p180
+sI4024
+S"                        formname='profile',"
+p181
+sI4025
+S'                        onvalidation=onvalidation,'
+p182
+sI4026
+S'                        hideerror=self.settings.hideerror):'
+p183
+sI4027
+S'            self.user.update(table_user._filter_fields(form.vars))'
+p184
+sI4028
+S'            session.flash = self.messages.profile_updated'
+p185
+sI4029
+S'            self.log_event(log, self.user)'
+p186
+sI4030
+S'            callback(onaccept, form)'
+p187
+ssg87
+S"(self=<gluon.tools.Auth object>, next='/SimpleAssetInventory/default/execute', onvalidation=[], onaccept=[], log='User %(id)s Profile updated')"
+p188
+sg89
+S'profile'
+p189
+sa(dp190
+g66
+S'/home/www-data/web2py/gluon/sqlhtml.py'
+p191
+sg68
+(dp192
+S').update'
+p193
+g111
+sS'self'
+p194
+S'<gluon.sqlhtml.SQLFORM object>'
+p195
+sS'self.id_field_name'
+p196
+S"'id'"
+p197
+sS'fields'
+p198
+S"{'email': 'ben.kolar@test.com', 'first_name': 'Ben', 'last_name': 'Kolar', 'password': 'pbkdf2(1000,20,sha512)$b7564ce67794af42$b77fe9843ae086df8c4560797e72a55329cc13a2', 'registration_id': '', 'registration_key': '', 'reset_password_key': '', 'username': 'Ben'}"
+p199
+ssg74
+I1744
+sg75
+(dp200
+I1739
+S'            elif self.table._db._uri:'
+p201
+sI1740
+S'                if record_id:'
+p202
+sI1741
+S'                    self.vars.id = self.record[self.id_field_name]'
+p203
+sI1742
+S'                    if fields:'
+p204
+sI1743
+S'                        self.table._db(self.table._id == self.record['
+p205
+sI1744
+S'                                       self.id_field_name]).update(**fields)'
+p206
+sI1745
+S'                else:'
+p207
+sI1746
+S'                    self.vars.id = self.table.insert(**fields)'
+p208
+sI1747
+S''
+sI1748
+S'        self.accepted = ret'
+p209
+ssg87
+S"(self=<gluon.sqlhtml.SQLFORM object>, request_vars=<Storage {'username': 'Ben', 'first_name': 'Ben'...4b61-a286-b03edc1da678', '_formname': 'profile'}>, session=<Storage {'_formkey[register]': ['eab839b2-4402-...gin]': ['8b4f0f71-f970-4b62-8c27-d0167eef1edf']}>, formname='profile', keepvalues=True, onvalidation=[], dbio=True, hideerror=False, detect_record_change=False, **kwargs={})"
+p210
+sg89
+S'accepts'
+p211
+sa(dp212
+g66
+S'/home/www-data/web2py/gluon/packages/dal/pydal/objects.py'
+p213
+sg68
+(dp214
+S'table._tablename'
+p215
+S"'auth_user'"
+p216
+sS'db._adapter'
+p217
+S'<pydal.adapters.sqlite.SQLiteAdapter object>'
+p218
+sS'fields'
+p219
+S"[(<pydal.objects.Field object>, 'Ben'), (<pydal.objects.Field object>, 'Ben'), (<pydal.objects.Field object>, 'Kolar'), (<pydal.objects.Field object>, ''), (<pydal.objects.Field object>, ''), (<pydal.objects.Field object>, 'pbkdf2(1000,20,sha512)$b7564ce67794af42$b77fe9843ae086df8c4560797e72a55329cc13a2'), (<pydal.objects.Field object>, ''), (<pydal.objects.Field object>, 'ben.kolar@test.com')]"
+p220
+sS'self'
+p221
+S'<Set (auth_user.id = 4)>'
+p222
+sS'db'
+p223
+S'<DAL uri="sqlite://storage.sqlite">'
+p224
+sS'self.query'
+p225
+S'<Query (auth_user.id = 4)>'
+p226
+sS'ret'
+p227
+g111
+sS'table'
+p228
+S'<Table auth_user (id, first_name, last_name, ema...ration_key, reset_password_key, registration_id)>'
+p229
+sS'db._adapter.update'
+p230
+S'<bound method SQLiteAdapter.update of <pydal.adapters.sqlite.SQLiteAdapter object>>'
+p231
+ssg74
+I2054
+sg75
+(dp232
+I2049
+S'        if any(f(self, update_fields) for f in table._before_update):'
+p233
+sI2050
+S'            return 0'
+p234
+sI2051
+S'        fields = table._listify(update_fields, update=True)'
+p235
+sI2052
+S'        if not fields:'
+p236
+sI2053
+S'            raise SyntaxError("No fields to update")'
+p237
+sI2054
+S'        ret = db._adapter.update("%s" % table._tablename, self.query, fields)'
+p238
+sI2055
+S'        ret and [f(self, update_fields) for f in table._after_update]'
+p239
+sI2056
+S'        return ret'
+p240
+sI2057
+S''
+sI2058
+S'    def update_naive(self, **update_fields):'
+p241
+ssg87
+S"(self=<Set (auth_user.id = 4)>, **update_fields={'email': 'ben.kolar@test.com', 'first_name': 'Ben', 'last_name': 'Kolar', 'password': 'pbkdf2(1000,20,sha512)$b7564ce67794af42$b77fe9843ae086df8c4560797e72a55329cc13a2', 'registration_id': '', 'registration_key': '', 'reset_password_key': '', 'username': 'Ben'})"
+p242
+sg89
+S'update'
+p243
+sa(dp244
+g66
+S'/home/www-data/web2py/gluon/packages/dal/pydal/adapters/base.py'
+p245
+sg68
+(dp246
+S'e'
+S"OperationalError('database is locked',)"
+p247
+ssg74
+I1031
+sg75
+(dp248
+I1026
+S'        except Exception:'
+p249
+sI1027
+S'            e = sys.exc_info()[1]'
+p250
+sI1028
+S'            table = self.db[tablename]'
+p251
+sI1029
+S"            if hasattr(table,'_on_update_error'):"
+p252
+sI1030
+S'                return table._on_update_error(table,query,fields,e)'
+p253
+sI1031
+S'            raise e'
+p254
+sI1032
+S'        try:'
+p255
+sI1033
+S'            return self.cursor.rowcount'
+p256
+sI1034
+S'        except:'
+p257
+sI1035
+S'            return None'
+p258
+ssg87
+S"(self=<pydal.adapters.sqlite.SQLiteAdapter object>, tablename='auth_user', query=<Query (auth_user.id = 4)>, fields=[(<pydal.objects.Field object>, 'Ben'), (<pydal.objects.Field object>, 'Ben'), (<pydal.objects.Field object>, 'Kolar'), (<pydal.objects.Field object>, ''), (<pydal.objects.Field object>, ''), (<pydal.objects.Field object>, 'pbkdf2(1000,20,sha512)$b7564ce67794af42$b77fe9843ae086df8c4560797e72a55329cc13a2'), (<pydal.objects.Field object>, ''), (<pydal.objects.Field object>, 'ben.kolar@test.com')])"
+p259
+sg89
+g243
+sasS'pyver'
+p260
+S'Python 2.7.6: /usr/bin/python (prefix: /usr)'
+p261
+sS'session'
+p262
+g61
+(S's\xe5\x08\x00\x00<div><table><tr><td style="font-weight:bold;vertical-align:top;">auth</td><td style="vertical-align:top;">:</td><td><div><table><tr><td style="font-weight:bold;vertical-align:top;">expiration</td><td style="vertical-align:top;">:</td><td><div>3600</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">hmac_key</td><td style="vertical-align:top;">:</td><td><div>d2ffc095-1b8f-4265-8b6f-f7581b83caab</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">last_visit</td><td style="vertical-align:top;">:</td><td><div>datetime.datetime(2016, 10, 21, 21, 56, 14, 234405)</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">user</td><td style="vertical-align:top;">:</td><td><div><table><tr><td style="font-weight:bold;vertical-align:top;">email</td><td style="vertical-align:top;">:</td><td><div>ayy.lmao@test.com</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">first_name</td><td style="vertical-align:top;">:</td><td><div>ayy</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">id</td><td style="vertical-align:top;">:</td><td><div>4L</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">last_name</td><td style="vertical-align:top;">:</td><td><div>lmao</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">registration_id</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">registration_key</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">reset_password_key</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">username</td><td style="vertical-align:top;">:</td><td><div>ayylmao</div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">user_groups</td><td style="vertical-align:top;">:</td><td><div><table><tr><td style="font-weight:bold;vertical-align:top;">9</td><td style="vertical-align:top;">:</td><td><div>user_4</div></td></tr></table></div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">flash</td><td style="vertical-align:top;">:</td><td><div>None</div></td></tr></table></div>'
+tRp263
+sS'etype'
+p264
+S"<class 'sqlite3.OperationalError'>"
+p265
+sS'date'
+p266
+S'Fri Oct 21 22:01:06 2016'
+p267
+sS'response'
+p268
+g61
+(S's.!\x00\x00<div><table><tr><td style="font-weight:bold;vertical-align:top;">body</td><td style="vertical-align:top;">:</td><td><div>&lt;cStringIO.StringO object at 0x7f16d9a41d50&gt;</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">cookies</td><td style="vertical-align:top;">:</td><td><div><table><tr><td style="font-weight:bold;vertical-align:top;">session_id_simpleassetinventory</td><td style="vertical-align:top;">:</td><td><div>10.1.10.24-32763fd8-a379-44a4-b479-5db5e42c10ff<table><tr><td style="font-weight:bold;vertical-align:top;">comment</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">domain</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">expires</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">httponly</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">max-age</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">path</td><td style="vertical-align:top;">:</td><td><div>/</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">secure</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">version</td><td style="vertical-align:top;">:</td><td><div></div></td></tr></table></div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">delimiters</td><td style="vertical-align:top;">:</td><td><div><table><tr><td><div>{{</div></td></tr><tr><td><div>}}</div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">files</td><td style="vertical-align:top;">:</td><td><div><table></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">flash</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">form_label_separator</td><td style="vertical-align:top;">:</td><td><div></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">formstyle</td><td style="vertical-align:top;">:</td><td><div>bootstrap3_inline</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">generic_patterns</td><td style="vertical-align:top;">:</td><td><div><table></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">google_analytics_id</td><td style="vertical-align:top;">:</td><td><div>None</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">headers</td><td style="vertical-align:top;">:</td><td><div><table><tr><td style="font-weight:bold;vertical-align:top;">X-Powered-By</td><td style="vertical-align:top;">:</td><td><div>web2py</div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">logo</td><td style="vertical-align:top;">:</td><td><div>/SimpleAssetInventory/static/images/favicon.png</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">menu</td><td style="vertical-align:top;">:</td><td><div><table><tr><td><div><table><tr><td><div>Home</div></td></tr><tr><td><div>False</div></td></tr><tr><td><div>/SimpleAssetInventory/default/index</div></td></tr><tr><td><div><table></table></div></td></tr></table></div></td></tr><tr><td><div><table><tr><td><div>Execute</div></td></tr><tr><td><div>False</div></td></tr><tr><td><div>/SimpleAssetInventory/default/execute</div></td></tr><tr><td><div><table></table></div></td></tr></table></div></td></tr><tr><td><div><table><tr><td><div>Results</div></td></tr><tr><td><div>False</div></td></tr><tr><td><div>/SimpleAssetInventory/default/results</div></td></tr><tr><td><div><table></table></div></td></tr></table></div></td></tr><tr><td><div><table><tr><td><div>Audit</div></td></tr><tr><td><div>False</div></td></tr><tr><td><div>/SimpleAssetInventory/default/audit</div></td></tr><tr><td><div><table></table></div></td></tr></table></div></td></tr><tr><td><div><table><tr><td><div>Edit Results</div></td></tr><tr><td><div>False</div></td></tr><tr><td><div>/SimpleAssetInventory/default/editresults</div></td></tr><tr><td><div><table></table></div></td></tr></table></div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">meta</td><td style="vertical-align:top;">:</td><td><div><table><tr><td style="font-weight:bold;vertical-align:top;">author</td><td style="vertical-align:top;">:</td><td><div>ShadeyShades &amp; Special K</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">description</td><td style="vertical-align:top;">:</td><td><div>Simple Inventory System</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">generator</td><td style="vertical-align:top;">:</td><td><div>Web2py Web Framework</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">keywords</td><td style="vertical-align:top;">:</td><td><div><table><tr><td><div>web2py</div></td></tr><tr><td><div>python</div></td></tr><tr><td><div>framework</div></td></tr></table></div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">models_to_run</td><td style="vertical-align:top;">:</td><td><div><table><tr><td><div>^\\w+\\.py$</div></td></tr><tr><td><div>^default/\\w+\\.py$</div></td></tr><tr><td><div>^default/user/\\w+\\.py$</div></td></tr></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">postprocessing</td><td style="vertical-align:top;">:</td><td><div><table></table></div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_client</td><td style="vertical-align:top;">:</td><td><div>10.1.10.24</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_cookie_compression_level</td><td style="vertical-align:top;">:</td><td><div>None</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_cookie_expires</td><td style="vertical-align:top;">:</td><td><div>None</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_data_name</td><td style="vertical-align:top;">:</td><td><div>session_data_simpleassetinventory</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_file</td><td style="vertical-align:top;">:</td><td><div>&lt;open file &#x27;/home/www-data/web2py/applications/SimpleAssetInventory/sessions/1fc/1ea/10.1.10.24-32763fd8-a379-44a4-b479-5db5e42c10ff&#x27;, mode &#x27;rb+&#x27; at 0x7f16d9a91ae0&gt;</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_filename</td><td style="vertical-align:top;">:</td><td><div>/home/www-data/web2py/applications/SimpleAssetInventory/sessions/10.1.10.24-32763fd8-a379-44a4-b479-5db5e42c10ff</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_hash</td><td style="vertical-align:top;">:</td><td><div>1e4f0f4f7fec334693299bf9da577bfc</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_id</td><td style="vertical-align:top;">:</td><td><div>10.1.10.24-32763fd8-a379-44a4-b479-5db5e42c10ff</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_id_name</td><td style="vertical-align:top;">:</td><td><div>session_id_simpleassetinventory</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_locked</td><td style="vertical-align:top;">:</td><td><div>True</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_masterapp</td><td style="vertical-align:top;">:</td><td><div>SimpleAssetInventory</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_new</td><td style="vertical-align:top;">:</td><td><div>False</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">session_storage_type</td><td style="vertical-align:top;">:</td><td><div>file</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">status</td><td style="vertical-align:top;">:</td><td><div>200</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">subtitle</td><td style="vertical-align:top;">:</td><td><div>Powered by Nmap and Python</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">title</td><td style="vertical-align:top;">:</td><td><div>Simple Asset Inventory</div></td></tr><tr><td style="font-weight:bold;vertical-align:top;">view</td><td style="vertical-align:top;">:</td><td><div>default/user.html</div></td></tr></table></div>'
+tRp269
+sS'locals'
+p270
+(dp271
+S'e'
+S"OperationalError('database is locked',)"
+p272
+sS'fields'
+p273
+S"[(<pydal.objects.Field object>, 'Ben'), (<pydal.objects.Field object>, 'Ben'), (<pydal.objects.Field object>, 'Kolar'), (<pydal.objects.Field object>, ''), (<pydal.objects.Field object>, ''), (<pydal.objects.Field object>, 'pbkdf2(1000,20,sha512)$b7564ce67794af42$b77fe9843ae086df8c4560797e72a55329cc13a2'), (<pydal.objects.Field object>, ''), (<pydal.objects.Field object>, 'ben.kolar@test.com')]"
+p274
+sS'self'
+p275
+S'<pydal.adapters.sqlite.SQLiteAdapter object>'
+p276
+sS'tablename'
+p277
+S"'auth_user'"
+p278
+sS'sql'
+p279
+S'"UPDATE auth_user SET username=\'Ben\',first_name=\'...il=\'ben.kolar@test.com\' WHERE (auth_user.id = 4);"'
+p280
+sS'query'
+p281
+S'<Query (auth_user.id = 4)>'
+p282
+sS'table'
+p283
+S'<Table auth_user (id, first_name, last_name, ema...ration_key, reset_password_key, registration_id)>'
+p284
+sssS'traceback'
+p285
+S'Traceback (most recent call last):\n  File "/home/www-data/web2py/gluon/restricted.py", line 227, in restricted\n    exec ccode in environment\n  File "/home/www-data/web2py/applications/SimpleAssetInventory/controllers/default.py", line 137, in <module>\n  File "/home/www-data/web2py/gluon/globals.py", line 417, in <lambda>\n    self._caller = lambda f: f()\n  File "/home/www-data/web2py/applications/SimpleAssetInventory/controllers/default.py", line 40, in user\n    return dict(form=auth())\n  File "/home/www-data/web2py/gluon/tools.py", line 1941, in __call__\n    return getattr(self, args[0])()\n  File "/home/www-data/web2py/gluon/tools.py", line 4026, in profile\n    hideerror=self.settings.hideerror):\n  File "/home/www-data/web2py/gluon/sqlhtml.py", line 1744, in accepts\n    self.id_field_name]).update(**fields)\n  File "/home/www-data/web2py/gluon/packages/dal/pydal/objects.py", line 2054, in update\n    ret = db._adapter.update("%s" % table._tablename, self.query, fields)\n  File "/home/www-data/web2py/gluon/packages/dal/pydal/adapters/base.py", line 1031, in update\n    raise e\nOperationalError: database is locked\n'
+p286
+s.
