@@ -122,7 +122,7 @@ def execute():
                         # Pull each host object out of the scan object
                         for hosts in scanresults.hosts:
                             # Make sure the host is up
-                            if scanresults.hosts.isup()
+                            if scanresults.hosts.is_up()
                             # Get all open ports for this host
                             resultports = hosts.get_open_ports()
                             # Merge the tuples in the format we want
