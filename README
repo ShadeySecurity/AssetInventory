@@ -24,9 +24,9 @@ Version: 0.2
 [x] Secure by design
 [ ] NMap result importation
 [ ] Nessus result importation
-[ ] Nessus direct integration
 [ ] Cisco config file importation
 [ ] Automagic network map creation
+[ ] Nessus direct integration
 [ ] Remote NMap execution via ssh
 [ ] Nessus remote execution
 [ ] Full difference tracking
