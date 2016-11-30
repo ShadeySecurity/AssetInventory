@@ -30,9 +30,10 @@ fi
 # Now to move in to a nice little setup home
 mkdir -p /opt/web2py/applications/SimpleAssetInventory
 cp -rfu ../* /opt/web2py/applications/SimpleAssetInventory
+# Sell the farm to web server, but make sure we are in the in crowd
+usermod $USER -a -G www-data
+newgrp www-data
 chown www-data:www-data /opt/web2py/ -R
-# TEll everyone we own this place
-chown $USER:$USER /opt/web2py -R
 # Put our main man at the head of the agency
 cp -fu ./cronrun.py /etc/cron.d/
 # Update cron to check on our main man every minutes... he has problems now
