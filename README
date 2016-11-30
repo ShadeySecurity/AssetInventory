@@ -1,2 +1,42 @@
-More details coming. 
-This is a web2py application, but please note you will need to run web2py through apache and run apache as root or give nmap SUID privs to run it's OS detection without root.
+= Authors =
+* SpecialK
+* ShadeyShades
+
+Version: 0.2
+= INSTALL =
+1. Install web2py to whatever specification you wish, see https://www.web2py.com/
+2. Copy the entire git package to it's Application directory, or from the UI do an application import
+3. Rename the root of the application folder or application in the UI to SimpleAssetInventory
+4. Install untangled python library
+5. Install libnmap and nmap python libraries https://pypi.python.org/pypi/python-libnmap/0.6.1 https://pypi.python.org/pypi/python-nmap
+6. Start Web2py!
+7. Sit back, and enjoy the fruits of your hard work.
+
+= FEATURES =
+== Roadmap to v1.0 ==
+[x] NMAP integrated scanning
+[x] Exportable results
+[x] Result Editing
+[x] Difference tracking (first, current)
+[x] Database backend
+[x] RBAC controls
+[x] Full auditing
+[x] Secure by design
+[ ] NMap result importation
+[ ] Nessus result importation
+[ ] Remote NMap execution via ssh
+[ ] Nessus direct integration
+[ ] Nessus remote execution
+[ ] Cisco config file importation
+[ ] Automagic network map creation
+[ ] Full difference tracking
+
+== Feature Under Consideration ==
+* Exportation of network map to Visio
+* Cron jobs (scheduled scanning)
+
+= LICENSE =
+Please see the standard license for Shadey Security, which prohibits commercial use of this product without paid license.
+
+= USAGE =
+TBA
