@@ -94,7 +94,7 @@ class SuperScan(object):
         validate = []
         validate.append(re.match(r'^[0-9a-zA-Z\-\.\-]{0,128}$',scanhosts))
         validate.append(re.match(r'^[1-5]$', scanspeed))
-        validate.append(re.match(r'^[0-9a-zA-Z\-\.\-]{0,256}$', scanhopts))
+        validate.append(re.match(r'^[0-9a-zA-Z\-\.\=]{0,256}$', scanhopts))
         if None in validate or False in validate:
             print("Customscan: CRITICAL: Invalid input received! Dieing now.")
             # Scorch earth if we dont get what we want!
