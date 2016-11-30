@@ -8,8 +8,7 @@ import sys
 import re
 import time
 import untangle
-
-
+from libnmap.parser import NmapParser
 
 class SuperScan(object):
     def __init__(self):
@@ -38,7 +37,7 @@ class SuperScan(object):
     # Input: None
     # Output: List of "Host" namedtuples that contain scan info
     #----------------------------#
-    def out_struct(self,xmlobj):
+    def out_struct(self):
         import re
         import warnings
 
@@ -122,11 +121,13 @@ class SuperScan(object):
             print("%s" % line)
         grepresults.close()
         try:
-            xmlobj = untangle.parse(xmlfile)
+            with open(xmlfile,'r') as xmlresults:
+                xmlobj =  NmapParser.parse_fromfile(xmlresults)
             return xmlobj
         except Exception as err:
             print("Customscan: Error: %s" % err)
             break
+        return null
 
     #----------------------------#
     # Name: outscan

@@ -9,6 +9,7 @@
 # -------------------------------------------------------------------------
 from nmapscanner import *
 
+
 def index():
     """
     example action using the internationalization operator T and flash
@@ -97,8 +98,8 @@ def execute():
                 speedopts = ["1","2","3","4","5"]
                 if form.vars.speed in speedopts:
                     response.flash = T('Thanks! The form has been submitted.')
-                    options = " -T "
-                    options += str(form.vars.speed)
+                    options = ""
+                    speed = " -T %s" % (form.vars.speed)
                     if "Get Hostname" in form.vars.execoptions:
                         options += "--script nbstat.nse"
                     elif "Get OS" in form.vars.execoptions:
@@ -115,15 +116,57 @@ def execute():
                     network =  str(form.vars.network)
                     fileopts = str(form.vars.results_location)
                     scan = SuperScan()
-                    scan.scan(network,options)
-                    scanresults = scan.out_struct()                    
-                    for result in scanresults:
-                        scanports = ''.join(result['ports'])
-                        success = db(db.results.ip == result['ip']).update(ports=result['ports'],os=result['os'],dns=result['dns'],netbios=result['netbios'],last_timestamp=str(datetime.now()))
-                        if success:
-                            response.flash = "Data has been updated!"
-                        else:
-                            success = db.results.insert(ip=result['ip'],ports=result['ports'],os=result['os'],dns=result['dns'],netbios=result['netbios'],first_timestamp=str(datetime.now()),last_timestamp=str(datetime.now()))
+                    # If we need root, use custom scan
+                    if "-O" in options or "-sS" in options or "-i" in options or "-A" in options:
+                        scanresults = scan.customscan(network,speed,options)
+                        # Pull each host object out of the scan object
+                        for hosts in scanresults.hosts:
+                            # Make sure the host is up
+                            if scanresults.hosts.isup()
+                            # Get all open ports for this host
+                            resultports = hosts.get_open_ports()
+                            # Merge the tuples in the format we want
+                            for tuples in resultports:
+                                # Combine tuples with a slash
+                                ports = "/".join(tuples)
+                                # Add a semi-colon for CSV compatible merged list
+                                ports += ";"
+                            # Simplify output of results if we can
+                            if "Windows" in hosts.os_match_probabilities():
+                                osmatches = "Windows"
+                            elif "Linux" in hosts.os_match_probabilities():
+                                osmatches = "Linux"
+                            else:
+                                osmatches = ";",.join(hosts.os_match_probabilities())
+                            # Grab and merge in a csv friendly manner the hostnames
+                            hostnames = ";".join(hosts.hostnames)
+                            #Grab out nbstat data
+                            for scriptDict in hosts.scripts_results:
+                                # check for nbstat scriptname id
+                                if scriptDict.get('id') == "nbstat":
+                                    # get the nbstat script result dictionary
+                                    nbresults= scriptDict
+                            # Write to DB
+                            success = db(db.results.ip == hosts.address).update(ports=ports, os=osmatches,
+                                                                               dns=hostnames,
+                                                                               netbios=nbresults,
+                                                                               last_timestamp=str(datetime.now()))
+                            if success:
+                                response.flash = "Data has been updated!"
+                            else:
+                                success = db.results.insert(ip=hosts.address,ports=ports, os=osmatches,dns=hostnames,netbios=nbresults,,first_timestamp=str(datetime.now()),last_timestamp=str(datetime.now()))
+
+                    else:
+                        options += speed
+                        scan.scan(network,options)
+                        scanresults = scan.out_struct()
+                        for result in scanresults:
+                            scanports = ''.join(result['ports'])
+                            success = db(db.results.ip == result['ip']).update(ports=result['ports'],os=result['os'],dns=result['dns'],netbios=result['netbios'],last_timestamp=str(datetime.now()))
+                            if success:
+                                response.flash = "Data has been updated!"
+                            else:
+                                success = db.results.insert(ip=result['ip'],ports=result['ports'],os=result['os'],dns=result['dns'],netbios=result['netbios'],first_timestamp=str(datetime.now()),last_timestamp=str(datetime.now()))
                 else:
                     response.flash = T('Thanks, but you gave us a bad speed! 0-5 please!')
             else:
