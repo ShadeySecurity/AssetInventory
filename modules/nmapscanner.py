@@ -1,9 +1,14 @@
 #!/usr/bin/env python
 # Written by ShadeyShades and SpecialK
 
+# Get our imports in!
 import traceback
 import json
 import sys
+import re
+import time
+import untangle
+
 
 
 class SuperScan(object):
@@ -33,17 +38,18 @@ class SuperScan(object):
     # Input: None
     # Output: List of "Host" namedtuples that contain scan info
     #----------------------------#
-    def out_struct(self):
+    def out_struct(self,xmlobj):
         import re
         import warnings
 
         #bail if no scan has been conducted.
         if not self.nm:
             warnings.warn('No scan found; please perform scan first.', UserWarning)
-            return
+            scan = xmlobj
+        else:
+            scan = self.nm
 
         # Build data structure keyed on ip address.
-        scan = self.nm
         outlist = []
         for host in scan.all_hosts():
             host_dict = {}
@@ -80,31 +86,47 @@ class SuperScan(object):
 
     #-----------------------------#
     # Name: customscan
-    # Desc: Runs a customscan and returns results
+    # Desc: Runs a customscan and returns results as an object
     # Input: scanhosts - what to scan
     #        scanspeed - how fast to scan
     #        scanopts  - what options to scan with
-    # Outputs: parsed - parsed results to be used as wish
+    # Outputs: xmlobj - object of the results
     #-----------------------------#
 
     def customscan(self, scanhosts, scanspeed, scanopts):
-        parsed = None
-        scanproc = NmapProcess(scanhosts, "%s -T %s" % (scanopts,scanspeed))
+        # Very important we validate our input as it comes from a web input
+        validate = []
+        validate.append(re.match(r'^[0-9a-zA-Z\-\.\-]{0,128}$',scanhosts))
+        validate.append(re.match(r'^[1-5]$', scanspeed))
+        validate.append(re.match(r'^[0-9a-zA-Z\-\.\-]{0,256}$', scanhopts))
+        if None in validate or False in validate:
+            print("Customscan: CRITICAL: Invalid input received! Dieing now.")
+            # Scorch earth if we dont get what we want!
+            exit(1)
+        # Create unique file for grab by our internal process, we need it to be unique for multiple users
+        scanme = "scanme%s" % (time.strftime("%Y%m%d%H%M%S"))
+        # Where we writing to
+        writelocation = "/tmp/%s" % (scanme)
+        # Open the file now
+        cronfile = open(writelocation,'w')
+        # Now we write to the file the instruction to run in cron, there will be a secondary script to run this!
+        xmlfile = "/tmp/%s.xml" % (scanme)
+        grepfile = "/tmp/%s.ngrep" % (scanme)
+        # Write to cron file
+        cronfile.write("nmap -T %s %s %s -oX %s -oG %s" % (scanspeed,scanopts,scanhosts,xmlfile,grepfile))
+        cronfile.close()
+        #wait 5 for script to start running
+        time.sleep(5)
+        grepresults = open(grepfile, 'r')
+        for line in grepresults:
+            print("%s" % line)
+        grepresults.close()
         try:
-            scanrun = scanproc.run()
-        except Exception as error:
-            print("Error: Scan did not run as expected! Message: %s" % error)
-            traceback.print_exc()
-        if scanproc != 0:
-            print("nmap scan failed: {0}".format(scanproc.stderr))
-        print(type(scanproc.stdout))
-
-        try:
-            parsed = NmapParser.parse(nmproc.stdout)
-        except NmapParserException as error:
-            print("Error: Scan did not run as expected! Message: %s" % error)
-            traceback.print_exc()
-        return parsed
+            xmlobj = untangle.parse(xmlfile)
+            return xmlobj
+        except Exception as err:
+            print("Customscan: Error: %s" % err)
+            break
 
     #----------------------------#
     # Name: outscan
