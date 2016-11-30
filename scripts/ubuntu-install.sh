@@ -30,12 +30,15 @@ else
     unzip /opt/web2py_src.zip -d /opt/
 fi
 # Now to move in to a nice little setup home
-mkdir -p /opt/web2py/applications/SimpleAssetInventory
+mkdir -P /opt/web2py/applications/SimpleAssetInventory
 cp -rfu ../* /opt/web2py/applications/SimpleAssetInventory
 # Sell the farm to web server, but make sure we are in the in crowd
 usermod $USER -a -G www-data
 newgrp www-data
 chown www-data:www-data /opt/web2py/ -R
+rm -rf /home/www-data/web2py/applications
+mkdir -P /home/www-data/web2py/
+sudo -u www-data ln -s ../applications/ /home/www-data/web2py/applications
 # Put our main man at the head of the agency
 cp -fu ./cronrun.py /etc/cron.d/
 # Update cron to check on our main man every minutes... he has problems now
