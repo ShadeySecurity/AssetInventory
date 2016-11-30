@@ -1,2 +1,2 @@
-libnmap==0.6.1
+python-libnmap==0.6.1
 python-nmap==0.6.1
