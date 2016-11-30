@@ -15,11 +15,11 @@ mkdir -P /opt/web2py/applications/SimpleAssetInventory
 if [ $1 == "offline"]; then
     # Use local cached version... may or may not work... not ideal
     unzip ./external/*.zip
-    tar -xvzf ./external/*.tar.gz
-    dpkg -i ./external/nmap_6.40-0.2ubuntu1_amd64.deb
-    cp -fu ./web2py /opt/
-    python ./python-libnmap-master/setup.py install
-    python ./python-nmap-0.6.1/setup.py install
+    tar -xvzf ./External/*.tar.gz
+    dpkg -i ./External/nmap_6.40-0.2ubuntu1_amd64.deb
+    cp -fu ./External/web2py /opt/
+    python ./External/python-libnmap-master/setup.py install
+    python ./External/python-nmap-0.6.1/setup.py install
 else
     # Pull the latest and greatest of everything directly from our friends online
     apt-get install python-pip wget unzip -yf
