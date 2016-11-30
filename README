@@ -4,13 +4,10 @@
 
 Version: 0.2
 = INSTALL =
-1. Optional: Install Apache
-2. Install web2py to whatever specification you wish, see https://www.web2py.com/
-3. Copy the entire git package to it's Application directory, or from the UI do an application import
-4. Rename the root of the application folder or application in the UI to SimpleAssetInventory
-5. Run install script in ./scripts
-6. Start Web2py!
-7. Sit back, and enjoy the fruits of your hard work.
+1. Optional: Install Apache (http://web2py.com/books/default/chapter/29/13/deployment-recipes#Apache-setup)
+2. Run install script in ./scripts
+3. Start Web2py or Apache!
+4. Sit back, and enjoy the fruits of your hard work.
 
 = FEATURES =
 == Roadmap to v1.0 ==
