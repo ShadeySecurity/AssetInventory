@@ -88,7 +88,7 @@ def execute(commnds):
             if not output = 0:
                 echo "execute: error: Unable to execute command: %s" % commands
         except Exception as err:
-                echo "execute: exception: Unable to execute commands %s" % commands
+                echo "execute: exception: Unable to execute commands %s" % (commands)
     elif type(commands) is list:
         for command in commands:
             try:

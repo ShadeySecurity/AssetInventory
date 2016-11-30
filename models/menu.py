@@ -48,7 +48,7 @@ def _():
     app = request.application
     ctr = request.controller
     # ------------------------------------------------------------------------------------------------------------------
-    # useful links to internal and external resources
+    # useful links to internal and scripts resources
     # ------------------------------------------------------------------------------------------------------------------
     response.menu += [
         (T('My Sites'), False, URL('admin', 'default', 'site')),
