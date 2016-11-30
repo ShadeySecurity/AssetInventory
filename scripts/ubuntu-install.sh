@@ -11,6 +11,7 @@ if [[ $EUID -ne 0 ]]; then
    echo "This script must be run as root" 1>&2
    exit 1
 fi
+chown $USER:$USER ../../ -R
 mkdir -P /opt/web2py/applications/SimpleAssetInventory
 if [ $1 == "offline"]; then
     # Use local cached version... may or may not work... not ideal
