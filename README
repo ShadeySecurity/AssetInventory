@@ -35,6 +35,9 @@ Version: 0.2
 * Exportation of network map to Visio
 * Cron jobs (scheduled scanning)
 * OpenV integration, importation, and remote execution
+* Powershell based scanning of windows machines with remote PowerShell execution
+* Python based agent
+
 = LICENSE =
 Please see the standard license for Shadey Security, which prohibits commercial use of this product without paid license.
 
