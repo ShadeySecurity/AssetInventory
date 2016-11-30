@@ -24,17 +24,17 @@ Version: 0.2
 [x] Secure by design
 [ ] NMap result importation
 [ ] Nessus result importation
-[ ] Remote NMap execution via ssh
 [ ] Nessus direct integration
-[ ] Nessus remote execution
 [ ] Cisco config file importation
 [ ] Automagic network map creation
+[ ] Remote NMap execution via ssh
+[ ] Nessus remote execution
 [ ] Full difference tracking
 
 == Feature Under Consideration ==
 * Exportation of network map to Visio
 * Cron jobs (scheduled scanning)
-
+* OpenV integration, importation, and remote execution
 = LICENSE =
 Please see the standard license for Shadey Security, which prohibits commercial use of this product without paid license.
 
