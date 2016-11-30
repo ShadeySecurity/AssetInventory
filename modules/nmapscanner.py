@@ -2,12 +2,9 @@
 # Written by ShadeyShades and SpecialK
 
 # Get our imports in!
-import traceback
 import json
-import sys
 import re
 import time
-import untangle
 from libnmap.parser import NmapParser
 
 class SuperScan(object):
