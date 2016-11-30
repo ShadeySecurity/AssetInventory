@@ -22,6 +22,8 @@ Version: 0.2
 [x] RBAC controls
 [x] Full auditing
 [x] Secure by design
+[ ] Run without root
+[ ] Install script
 [ ] NMap result importation
 [ ] Nessus result importation
 [ ] Cisco config file importation
