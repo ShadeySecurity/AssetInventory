@@ -23,9 +23,9 @@ if [ $1 == "offline"]; then
 else
     # Pull the latest and greatest of everything directly from our friends online
     apt-get install python-pip wget unzip -yf
-    wget http://www.web2py.com/examples/static/web2py_src.zip --directory-prefix=/opt
+    wget http://www.web2py.com/examples/static/web2py_src.zip --directory-prefix=/opt --prefix=/opt/
     pip install -r requirements.txt
-    unzip /opt/web2py_src.zip
+    unzip /opt/web2py_src.zip -d /opt/
 fi
 # Now to move in to a nice little setup home
 cp -rfu ../* /opt/web2py/applications/SimpleAssetInventory
