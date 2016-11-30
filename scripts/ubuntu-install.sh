@@ -28,7 +28,8 @@ else
     unzip /opt/web2py_src.zip -d /opt/
 fi
 # Now to move in to a nice little setup home
-cp -rfu ../* /opt/web2py/applications/SimpleAssetInventory
+cp -rfu ../* /opt/web2py/applications/
+mv /opt/web2py/applications/AssetInventory /opt/web2py/applications/SimpleAssetInventory
 # TEll everyone we own this place
 chown $USER:$USER /opt/web2py -R
 # Put our main man at the head of the agency
