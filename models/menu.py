@@ -6,13 +6,14 @@
 # ----------------------------------------------------------------------------------------------------------------------
 
 response.logo = "/SimpleAssetInventory/static/images/favicon.png"
-response.title = "Simple Asset Inventory"
-response.subtitle = T('Powered by Nmap and Python')
+response.title = T("Simple Asset Inventory")
+response.subtitle = T('Powered by Python')
 
 # ----------------------------------------------------------------------------------------------------------------------
 # read more at http://dev.w3.org/html5/markup/meta.name.html
 # ----------------------------------------------------------------------------------------------------------------------
-response.meta.author = "ShadeyShades & Special K"
+response.meta.author = "ShadeyShades, Special K, and the rest of the SimpleAssetInventory team"
+response.meta.source = "https://github.com/ShadeySecurity/AssetInventory"
 response.meta.description = T("Simple Inventory System")
 response.meta.keywords = myconf.get('app.keywords')
 response.meta.generator = myconf.get('app.generator')

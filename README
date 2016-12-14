@@ -9,36 +9,15 @@ Version: 0.2
 3. Start Web2py or Apache!
 4. Sit back, and enjoy the fruits of your hard work.
 
-= FEATURES =
-== Roadmap to v1.0 ==
-[x] NMAP integrated scanning
-[x] Exportable results
-[x] Result Editing
-[x] Difference tracking (first, current)
-[x] Database backend
-[x] RBAC controls
-[x] Full auditing
-[x] Secure by design
-[x] Run without root
-[x] Install script
-[ ] NMap result importation
-[ ] Nessus result importation
-[ ] Cisco config file importation
-[ ] Automagic network map creation
-[ ] Nessus direct integration
-[ ] Remote NMap execution via ssh
-[ ] Nessus remote execution
-[ ] Full difference tracking
-
-== Feature Under Consideration ==
-* Exportation of network map to Visio
-* Cron jobs (scheduled scanning)
-* OpenV integration, importation, and remote execution
-* Powershell based scanning of windows machines with remote PowerShell execution
-* Python based agent
+= Operational Status =
+Does the current build actually run / compile?
+[NO] Master
+[NO] DEV
 
 = LICENSE =
-Please see the standard license for Shadey Security, which prohibits commercial use of this product without paid license.
+Please see the standard license for Shadey Security included in this package,
+which prohibits commercial use of this product without paid license, with a few exceptions.
 
-= USAGE =
-TBA
+= More Info =
+Check out our wiki... we're adding to it all the time!
+https://github.com/ShadeySecurity/pyAssetInventory/wiki

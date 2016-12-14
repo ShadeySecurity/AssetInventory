@@ -141,7 +141,153 @@ auth.settings.reset_password_requires_verification = True
 # after defining tables, uncomment below to enable auditing
 # -------------------------------------------------------------------------
 # auth.enable_record_versioning(db)
-ourtime = datetime.now()
-db.define_table('auditexecute', Field('username', db.auth_user, default=auth.user_id, writable=False, requires=IS_NOT_EMPTY()), Field('network','string', default='127.0.0.1',requires=IS_NOT_EMPTY()), Field('speed', default="3", requires=IS_IN_SET(['1', '2', '3', '4', '5'])), Field('execoptions',requires=IS_IN_SET(["Get Hostname","Get OS","Get ALL","Advanced Only"],multiple=(1,4))), Field('advancedCMDS','string'), Field('Identifier'), Field('description','text'), Field('justification',requires=IS_NOT_EMPTY(),type="text"), Field('date_timestamp',default=ourtime,writable=False, requires=IS_NOT_EMPTY()) )
+ourtime = datetime.utcnow()
 
-db.define_table('results', Field('ip','string', requires=IS_NOT_EMPTY()),  Field('os','string', requires=IS_NOT_EMPTY()), Field('ports','string'),Field('dns','string'),Field('netbios','string'), Field('first_timestamp',default=ourtime,writable=False, requires=IS_NOT_EMPTY()),Field('last_timestamp',default=ourtime,writable=False, requires=IS_NOT_EMPTY()))
+# Custom Databases
+# Reference https://github.com/ShadeySecurity/pyAssetInventory/wiki/Database-Structure
+
+db.define_table('scans', Field('username', db.auth_user, default=auth.user_id, writable=False, requires=IS_NOT_EMPTY()),
+                Field('scan_type','string', requires=IS_IN_SET(['nessus', 'nmap', 'powershell', 'openvas', 'ssh','csv'])),
+                Field('network','string', default='127.0.0.1/32',requires=IS_NOT_EMPTY()),
+                Field('command','string'),
+                Field('task_id', 'string'),
+                Field('description','text'),
+                Field('justification','text', requires=IS_NOT_EMPTY()),
+                Field('approver','string'),
+                Field('date_timestamp','date', default=ourtime,writable=False, requires=IS_NOT_EMPTY()),
+                Field('scanner_ip', 'string',default='127.0.0.1', requires=IS_NOT_EMPTY()),
+                Field('user_ip','string', default='127.0.0.1')
+                )
+
+db.define_table('hosts',
+                Field('ip', 'string', requires=IS_NOT_EMPTY()),
+                Field('netmask', 'string'),
+                Field('mac', 'string', requires=IS_NOT_EMPTY()),
+                Field('vendor', 'string'),
+                Field('os', 'string', default="Other", requires=IS_IN_SET(['Linux','Windows','Mac','Unix','Other'])),
+                Field('os_version'),
+                Field('pingable', 'boolean', default=False, requires=IS_NOT_EMPTY()),
+                Field('distance', 'integer', default=1, requires=IS_NOT_EMPTY()),
+                Field('rtt', 'integer',  default=1, requires=IS_NOT_EMPTY()),
+                Field('scan_id', requires=IS_NOT_EMPTY()),
+                Field('host_type', requires=IS_NOT_EMPTY()),
+                Field('firewall_state', requires=IS_IN_SET(['on','partial','off'])),
+                singular="host",
+                plural="hosts"
+                )
+
+db.define_table('hostnames',
+                Field('ip', requires=IS_NOT_EMPTY()),
+                Field('hostname', requires=IS_NOT_EMPTY()),
+                Field('record_type', requires=IS_NOT_EMPTY()),
+                Field('dns_source'),
+                Field('scan_id', requires=IS_NOT_EMPTY())
+                )
+db.define_table('ports',
+                Field('host_id', 'reference hosts'),
+                Field('port', 'string', requires=IS_NOT_EMPTY()),
+                Field('protocol', 'string', default='tcp', requires=IS_NOT_EMPTY()),
+                Field('service', 'string', default='unk', requires=IS_NOT_EMPTY()),
+                Field('scan_id', 'string', requires=IS_NOT_EMPTY()),
+                Field('banner', 'string', requires=IS_NOT_EMPTY()),
+                singular="port",
+                plural="ports"
+                )
+
+
+db.define_table('software',
+                Field('ip', 'string', requires=IS_NOT_EMPTY()),
+                Field('software_name', 'string', requires=IS_NOT_EMPTY()),
+                Field('software_version', 'string', requires=IS_NOT_EMPTY()),
+                Field('install_user', 'string'),
+                Field('install_date', 'string'),
+                Field('scan_id', 'string', requires=IS_NOT_EMPTY())
+                )
+db.define_table('software_auth', Field('software_vendor'),
+                Field('software_name', requires=IS_NOT_EMPTY()),
+                Field('software_version', requires=IS_NOT_EMPTY()),
+                Field('auth_uid', requires=IS_NOT_EMPTY()),
+                Field('win_auth','boolean', default=False, requires=IS_NOT_EMPTY()),
+                Field('nix_auth','boolean', default=False, requires=IS_NOT_EMPTY()),
+                Field('mac_auth','boolean', default=False, requires=IS_NOT_EMPTY()),
+                Field('contract','string'),
+                Field('last_updated','string', requires=IS_NOT_EMPTY()),
+                Field('description','text')
+                )
+db.define_table('vulnerabilities', Field('software_vendor'),
+                Field('software_name','string', requires=IS_NOT_EMPTY()),
+                Field('software_version', requires=IS_NOT_EMPTY()),
+                Field('os', requires=IS_NOT_EMPTY()),
+                Field('os_version', requires=IS_NOT_EMPTY()),
+                Field('cve',requires=IS_NOT_EMPTY()),
+                Field('ip', requires=IS_NOT_EMPTY()),
+                Field('criticality', requires=IS_IN_SET(['Critical','High','Medium','Low'])),
+                Field('scan_id', requires=IS_NOT_EMPTY()),
+                Field('description')
+                )
+db.define_table('hops', Field('ip', requires=IS_NOT_EMPTY()),
+                Field('hostname'),
+                Field('scanner_ip', requires=IS_NOT_EMPTY()),
+                Field('dst_ip', requires=IS_NOT_EMPTY()),
+                Field('rtt', requires=IS_NOT_EMPTY()),
+                Field('ttl', requires=IS_NOT_EMPTY()),
+                Field('scan_id', requires=IS_NOT_EMPTY())
+                )
+db.define_table('interfaces',
+                Field('ip', requires=IS_NOT_EMPTY()),
+                Field('interface', requires=IS_NOT_EMPTY()),
+                Field('description'),
+                Field('speed'),
+                Field('interface_network'),
+                Field('vlan'),
+                Field('port_type'),
+                Field('host_type'),
+                Field('scan_id', requires=IS_NOT_EMPTY()),
+                Field('next_device')
+                )
+db.define_table('vlans',
+                Field('vlan_id', requires=IS_NOT_EMPTY()),
+                Field('vlan_desc'),
+                Field('interface', requires=IS_NOT_EMPTY()),
+                Field('is_native', 'boolean', default=False, requires=IS_NOT_EMPTY())
+                )
+db.define_table('routes',
+                Field('route_type', requires=IS_NOT_EMPTY()),
+                Field('is_default', 'boolean',default=False, requires=IS_NOT_EMPTY()),
+                Field('src_network', requires=IS_NOT_EMPTY()),
+                Field('dst_network', requires=IS_NOT_EMPTY()),
+                Field('interface', requires=IS_NOT_EMPTY()),
+                Field('metric'),
+                Field('next_hop', requires=IS_NOT_EMPTY())
+                )
+db.define_table('host_users',
+                Field('username', requires=IS_NOT_EMPTY()),
+                Field('creation_date'),
+                Field('privilege_level', requires=IS_NOT_EMPTY()),
+                Field('scan_id')
+                )
+db.define_table('auth_groups',
+                Field('group_name', requires=IS_NOT_EMPTY()),
+                Field('username'),
+                Field('creation_date'),
+                Field('scan_id')
+                )
+db.define_table('fw_acl',
+                Field('rule_name'),
+                Field('traffic_action', requires=IS_IN_SET(['deny','accept','reject'])),
+                Field('src_net', requires=IS_NOT_EMPTY()),
+                Field('dst_net', requires=IS_NOT_EMPTY()),
+                Field('interface', requires=IS_NOT_EMPTY()),
+                Field('src_port', requires=IS_NOT_EMPTY()),
+                Field('dst_port', requires=IS_NOT_EMPTY()),
+                Field('protocol', requires=IS_IN_SET(['tcp','udp','icmp'])),
+                Field('service', requires=IS_NOT_EMPTY()),
+                Field('hostname', requires=IS_NOT_EMPTY()),
+                Field('fw_name', requires=IS_IN_SET(['cisco-acl','iptables','winfw','ufw','ipchains','other'])),
+                Field('state_type', requires=IS_IN_SET(['stateful','stateless'])),
+                Field('scan_id', requires=IS_NOT_EMPTY()),
+                Field('description', 'text', requires=IS_NOT_EMPTY()),
+                Field('logged', 'boolean', default=False, requires=IS_NOT_EMPTY()),
+                Field('other_args', requires=IS_NOT_EMPTY()),
+                Field('scan_id', requires=IS_NOT_EMPTY())
+                )

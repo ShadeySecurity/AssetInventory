@@ -1,16 +1,19 @@
 #!/usr/bin/env python
 # Written by ShadeyShades and SpecialK
+# This file is being single purposed!!
+
 
 # Get our imports in!
 import json
 import re
 import time
+
 from libnmap.parser import NmapParser
+
 
 class SuperScan(object):
     def __init__(self):
         self.nm = None
-
 
     #-----------------------------#
     # Name: scan
@@ -26,50 +29,6 @@ class SuperScan(object):
         if len(options) < 2:
             options = '--script nbstat.nse -O -Pn -sV -T3'
         self.nm.scan(hosts, arguments=options)
-
-
-    #----------------------------#
-    # Name: out_struct
-    # Desc: Returns nmap results in data structure
-    # Input: None
-    # Output: List of "Host" namedtuples that contain scan info
-    #----------------------------#
-    def out_struct(self):
-        import re
-        import warnings
-
-        #bail if no scan has been conducted.
-        if not self.nm:
-            warnings.warn('No scan found; please perform scan first.', UserWarning)
-            scan = xmlobj
-        else:
-            scan = self.nm
-
-        # Build data structure keyed on ip address.
-        outlist = []
-        for host in scan.all_hosts():
-            host_dict = {}
-            host_dict['ip'] = host
-            os_string = ''
-            if 'osmatch' in scan[host]:
-                os_string = ' or '.join([os['name'] for os in scan[host]['osmatch']])
-            host_dict['os'] = os_string
-            tcp_ports = ['tcp/'+str(port) for port in scan[host].all_tcp()]
-            udp_ports = ['udp/'+str(port) for port in scan[host].all_udp()]
-            all_ports = sorted(tcp_ports + udp_ports)
-            host_dict['ports'] = all_ports
-            host_dict['dns'] = scan[host].hostname()
-            netbios_string = ''
-            if 'hostscript' in scan[host]:
-                for x in scan[host]['hostscript']:
-                    m = re.search('(?<=NetBIOS name: )[^,]+', x['output'])
-                    netbios_string = m.group(0)
-            host_dict['netbios'] = netbios_string
-            outlist.append(host_dict)
-
-        return outlist
-
-
     #----------------------------#
     # Name: out_csv
     # Desc: Returns nmap results in csv string
@@ -78,7 +37,6 @@ class SuperScan(object):
     #----------------------------#
     def out_csv(self):
         return self.nm.csv()
-
 
     #-----------------------------#
     # Name: customscan
@@ -123,7 +81,7 @@ class SuperScan(object):
             return xmlobj
         except Exception as err:
             print("Customscan: Error: %s" % err)
-            break
+            return
         return null
 
     #----------------------------#

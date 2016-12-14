@@ -4191,3 +4191,689 @@ success!
 success!
 success!
 success!
+timestamp: 2016-12-04T19:24:03.348951
+CREATE TABLE scans(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username INTEGER REFERENCES auth_user (id) ON DELETE CASCADE  ,
+    scan_type CHAR(512),
+    network CHAR(512),
+    command TEXT,
+    task_id CHAR(512),
+    description TEXT,
+    justification TEXT,
+    approver CHAR(512),
+    date_timestamp CHAR(512),
+    scanner_ip CHAR(512),
+    user_ip CHAR(512)
+);
+success!
+timestamp: 2016-12-04T19:24:03.359825
+CREATE TABLE hosts(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    mac CHAR(512),
+    vendor CHAR(512),
+    ip CHAR(512),
+    os CHAR(512),
+    hostnames CHAR(512),
+    os_version CHAR(512),
+    pingable CHAR(512),
+    distance CHAR(512),
+    ttl CHAR(512),
+    scan_id CHAR(512)
+);
+success!
+timestamp: 2016-12-04T19:24:03.373250
+CREATE TABLE ports(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ip CHAR(512),
+    port CHAR(512),
+    protocol CHAR(512),
+    service CHAR(512),
+    scan_id CHAR(512),
+    banner CHAR(512)
+);
+success!
+timestamp: 2016-12-04T19:24:03.377962
+CREATE TABLE software(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ip CHAR(512),
+    software_name CHAR(512),
+    software_version CHAR(512),
+    install_user CHAR(512),
+    install_date CHAR(512),
+    scan_id CHAR(512)
+);
+success!
+timestamp: 2016-12-04T19:26:45.464873
+CREATE TABLE software_auth(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    software_vendor CHAR(512),
+    software_name CHAR(512),
+    software_version CHAR(512),
+    auth_uid CHAR(512),
+    win_auth CHAR(1),
+    nix_auth CHAR(1),
+    mac_auth CHAR(1),
+    contract CHAR(512),
+    last_updated CHAR(512),
+    description TEXT
+);
+success!
+timestamp: 2016-12-04T19:26:45.470367
+CREATE TABLE vulnerabilities(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    software_vendor CHAR(512),
+    software_name CHAR(512),
+    software_version CHAR(512),
+    os CHAR(512),
+    os_version CHAR(512),
+    cve CHAR(512),
+    ip CHAR(512),
+    criticality CHAR(512),
+    scan_id CHAR(512),
+    description CHAR(512)
+);
+success!
+timestamp: 2016-12-04T19:26:45.475104
+CREATE TABLE hops(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ip CHAR(512),
+    hostname CHAR(512),
+    scanner_ip CHAR(512),
+    dst_ip CHAR(512),
+    rtt CHAR(512),
+    ttl CHAR(512),
+    scan_id CHAR(512)
+);
+success!
+timestamp: 2016-12-08T20:18:25.777619
+ALTER TABLE hosts ADD host_type CHAR(512);
+timestamp: 2016-12-08T20:18:25.788487
+ALTER TABLE hosts ADD firewall_state CHAR(512);
+success!
+timestamp: 2016-12-08T20:18:25.815850
+CREATE TABLE interfaces(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ip CHAR(512),
+    interface CHAR(512),
+    description CHAR(512),
+    speed CHAR(512),
+    interface_network CHAR(512),
+    vlan CHAR(512),
+    port_type CHAR(512),
+    host_type CHAR(512),
+    scan_id CHAR(512),
+    next_device CHAR(512)
+);
+success!
+timestamp: 2016-12-08T20:18:25.821917
+CREATE TABLE vlans(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    vlan_id CHAR(512),
+    vlan_desc CHAR(512),
+    interface CHAR(512),
+    is_native CHAR(1)
+);
+success!
+timestamp: 2016-12-08T20:18:25.828256
+CREATE TABLE routes(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    route_type CHAR(512),
+    is_default CHAR(1),
+    src_network CHAR(512),
+    dst_network CHAR(512),
+    interface CHAR(512),
+    metric CHAR(512),
+    next_hop CHAR(512)
+);
+success!
+success!
+timestamp: 2016-12-08T21:50:53.188131
+ALTER TABLE hosts ADD network CHAR(512);
+timestamp: 2016-12-08T21:50:53.193363
+ALTER TABLE hosts ADD rtt INTEGER;
+success!
+timestamp: 2016-12-08T21:50:53.212526
+CREATE TABLE hostnames(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ip CHAR(512),
+    hostname CHAR(512),
+    record_type CHAR(512),
+    dns_source CHAR(512),
+    scan_id CHAR(512)
+);
+success!
+success!
+success!
+success!
+success!
+timestamp: 2016-12-08T21:52:51.268610
+CREATE TABLE host_users(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username CHAR(512),
+    creation_date CHAR(512),
+    privilege_level CHAR(512),
+    scan_id CHAR(512)
+);
+success!
+timestamp: 2016-12-08T21:52:51.290437
+CREATE TABLE auth_groups(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    group_name CHAR(512),
+    username CHAR(512),
+    creation_date CHAR(512),
+    scan_id CHAR(512)
+);
+success!
+success!
+success!
+success!
+success!
+timestamp: 2016-12-08T21:53:49.309032
+CREATE TABLE fw_acl(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    rule_name CHAR(512),
+    traffic_action CHAR(512),
+    src_net CHAR(512),
+    dst_net CHAR(512),
+    interface CHAR(512),
+    src_port CHAR(512),
+    dst_port CHAR(512),
+    protocol CHAR(512),
+    service CHAR(512),
+    hostname CHAR(512),
+    fw_name CHAR(512),
+    state_type CHAR(512),
+    scan_id CHAR(512),
+    description TEXT,
+    logged CHAR(1),
+    other_args CHAR(512)
+);
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+timestamp: 2016-12-09T19:48:55.236613
+ALTER TABLE hosts ADD netmask CHAR(512);
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+timestamp: 2016-12-09T20:14:53.418362
+ALTER TABLE ports ADD host_id INTEGER REFERENCES hosts (id) ON DELETE CASCADE  ;
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
