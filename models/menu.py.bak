@@ -6,13 +6,14 @@
 # ----------------------------------------------------------------------------------------------------------------------
 
 response.logo = "/SimpleAssetInventory/static/images/favicon.png"
-response.title = "Simple Asset Inventory"
-response.subtitle = T('Powered by Nmap and Python')
+response.title = T("Simple Asset Inventory")
+response.subtitle = T('Powered by Python')
 
 # ----------------------------------------------------------------------------------------------------------------------
 # read more at http://dev.w3.org/html5/markup/meta.name.html
 # ----------------------------------------------------------------------------------------------------------------------
-response.meta.author = "ShadeyShades & Special K"
+response.meta.author = "ShadeyShades, SpecialK, and the rest of the SimpleAssetInventory team"
+response.meta.source = "https://github.com/ShadeySecurity/AssetInventory"
 response.meta.description = T("Simple Inventory System")
 response.meta.keywords = myconf.get('app.keywords')
 response.meta.generator = myconf.get('app.generator')
@@ -28,10 +29,12 @@ response.google_analytics_id = None
 
 response.menu = [
     (T('Home'), False, URL('default', 'index'), []),
-    (T('Execute'), False, URL('default','execute'),[]),
+    (T('Execute'), False, URL('default','execute'),[
+            (T('Import_Results'), False, URL('default','import_results'))
+        ]),
     (T('Results'), False, URL('default','results'), []),
     (T('Audit'), False, URL('default','audit'), []),
-    (T('Edit Results', False, URL('default','editresults'),[]),
+    (T('Edit Results'), False, URL('default','editresults'),[])
 ]
 
 DEVELOPMENT_MENU = False
@@ -48,7 +51,7 @@ def _():
     app = request.application
     ctr = request.controller
     # ------------------------------------------------------------------------------------------------------------------
-    # useful links to internal and external resources
+    # useful links to internal and scripts resources
     # ------------------------------------------------------------------------------------------------------------------
     response.menu += [
         (T('My Sites'), False, URL('admin', 'default', 'site')),

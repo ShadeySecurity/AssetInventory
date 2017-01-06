@@ -12,7 +12,7 @@ response.subtitle = T('Powered by Python')
 # ----------------------------------------------------------------------------------------------------------------------
 # read more at http://dev.w3.org/html5/markup/meta.name.html
 # ----------------------------------------------------------------------------------------------------------------------
-response.meta.author = "ShadeyShades, Special K, and the rest of the SimpleAssetInventory team"
+response.meta.author = "ShadeyShades, SpecialK, and the rest of the SimpleAssetInventory team"
 response.meta.source = "https://github.com/ShadeySecurity/AssetInventory"
 response.meta.description = T("Simple Inventory System")
 response.meta.keywords = myconf.get('app.keywords')
@@ -29,7 +29,9 @@ response.google_analytics_id = None
 
 response.menu = [
     (T('Home'), False, URL('default', 'index'), []),
-    (T('Execute'), False, URL('default','execute'),[]),
+    (T('Execute'), False, URL('execute','index'),[
+            (T('Import_Results'), False, URL('execute','import_results'))
+        ]),
     (T('Results'), False, URL('default','results'), []),
     (T('Audit'), False, URL('default','audit'), []),
     (T('Edit Results'), False, URL('default','editresults'),[])
@@ -42,18 +44,6 @@ DEVELOPMENT_MENU = False
 # provide shortcuts for development. remove in production
 # ----------------------------------------------------------------------------------------------------------------------
 
-def _():
-    # ------------------------------------------------------------------------------------------------------------------
-    # shortcuts
-    # ------------------------------------------------------------------------------------------------------------------
-    app = request.application
-    ctr = request.controller
-    # ------------------------------------------------------------------------------------------------------------------
-    # useful links to internal and scripts resources
-    # ------------------------------------------------------------------------------------------------------------------
-    response.menu += [
-        (T('My Sites'), False, URL('admin', 'default', 'site')),
-    ]
 
 
 if DEVELOPMENT_MENU:

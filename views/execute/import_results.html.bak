@@ -1,0 +1,6 @@
+{{extend 'layout.html'}}
+<center>
+{{ =H1(T("Import Results From External Scans")) }}
+</center>
+<br />
+{{=BEAUTIFY(response._vars)}}
