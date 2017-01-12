@@ -1,11 +1,5 @@
 #!/usr/bin/python
 
-# NAME: PYNMAPASSET
-# DISPLAYNAME: NMAP
-# END: BACK
-# AUTHOR: ShadeyShades
-# DESCRIPTION: Import nmap xml and execute nmap scans into standard format.
-
 ######################
 # Name: pynmap.py
 # Description:  A helper class which allows us to ingest, read, and convert NMap XML files/objects.
@@ -139,3 +133,8 @@ class pyassetnmap(object):
         for endtime in top.iter('finished'):
             nmapdict['scan']['end_time'] = str(endtime.get('timestr'))
         return nmapdict
+
+
+
+
+

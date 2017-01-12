@@ -98,7 +98,7 @@ class pyassetcisco(object):
                     ciscodict['radius'][server] = {}
                     ciscodict['radius'][server]['acct-port'] = acct
                     ciscodict['radius'][server]['auth-port'] = auth
-            elif re.match(r'^interface',line):
+            elif re.match(r'^interface',line)
                 ciscodict['interfaces'] = {}
                 childcounter = counter
                 child = ciscoobj[childcounter]

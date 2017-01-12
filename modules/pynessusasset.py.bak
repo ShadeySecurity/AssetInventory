@@ -1,11 +1,5 @@
 #!/usr/bin/python
 
-# NAME: PYNESSUSASSET
-# DISPLAYNAME: NESSUS
-# END: BACK
-# AUTHOR: ShadeyShades
-# DESCRIPTION: Import Nessus XML files into the standard format.
-
 # Contains the nessus import and function tests
 import re
 import xml.etree.ElementTree as ET
