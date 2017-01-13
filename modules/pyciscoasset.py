@@ -2,9 +2,10 @@
 
 # NAME: PYCISCOASSET
 # DISPLAYNAME: Cisco
-# END: BACK
+# FUNCTIONS: IMPORT
 # AUTHOR: ShadeyShades
 # DESCRIPTION: Load a cisco config file into standard format.
+# DISABLE: FALSE
 
 import re
 
@@ -17,15 +18,15 @@ accesslistreg = re.compile(r'^access\-list\s(?P<name>([\d]*)|(.*))(\s)?(?P<aclty
                            r'(\s)?((?P<src_sub2>(?:[0-9]{1,3}\.){3}255)|(?P<dst_net2>(?:[0-9]{1,3}\.){3}[0-9]{1,3})|'
                            r'(host\s(?P<dst_host2>(?:[0-9]{1,3}\.){3}[0-9]{1,3}))|(?P<dst_any2>any)|(eq\s(?P<port>.*))|'
                            r'(?P<log>log))?(\s)?((?P<dst_sub3>(?:[0-9]{1,3}\.){3}255)|(eq\s(?P<port2>.*)))?')
-class pyassetcisco(object):
+class cisco(object):
     def __init__(self):
         pass
-    def loadciscoconfig(self,file):
+    def import_ciscoconfig(self,file):
         if not type(file) is str:
             return
         if not re.match(r'^CISCO\_(?:[0-9]{1,3}\.){3}[0-9]{1,3}_[0-9]{20}\.(conf|txt)?$',file):
             return
-        with open(file,'rb') as ciscofile:
+        with open(file,'r') as ciscofile:
             if len(ciscofile.readlines()) > 4000:
                     print("loadciscoconfig:Critical: File length of provided file is too long.")
                     return

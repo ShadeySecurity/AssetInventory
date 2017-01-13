@@ -1,19 +1,20 @@
 #!/usr/bin/env python
 
 # NAME: PYCSVASSET
-# DISPLAYNAME: CSV
-# END: BACK
+# DISPLAYNAME: CSVASSET
+# FUNCTIONS: IMPORT,EXPORT
 # AUTHOR: ShadeyShades
-# DESCRIPTION: Import and export asset objects as csv.
+# DESCRIPTION: Import and export asset objects as csv
+# DISABLE: FALSE
 
 import csv
 import re
 
 
-class pyassetcsv(object):
+class csvasset(object):
     def __init__(self):
         pass
-    def loadcsv(self,file):
+    def import_csv(self,file):
         if not type(file) is str:
             return
         if not re.match(r'^CSV\_(?:[0-9]{1,3}\.){3}[0-9]{1,3}_[0-9]{20}\.(csv|txt)$',file):
@@ -27,7 +28,7 @@ class pyassetcsv(object):
             print("readcsv: Error: %s" % err)
         return  csvobj
 
-    def writedict2csv(self,dictobj,file,fieldnames):
+    def export_dict2csv(self,dictobj,file,fieldnames):
         if not type(dictobj) is dict:
             return
         if not re.match(r'^CSV\_([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])_[0-9]{20}\.csv',file):
@@ -48,7 +49,7 @@ class pyassetcsv(object):
             print("readcsv: Error: %s" % err)
         return True
 
-    def writelist2csv(self,listobj,file):
+    def export_list2csv(self,listobj,file):
         # We are a expecting a list with tuples
         if not type(file) is list and type(file[0]) is tuple:
             return

@@ -1,10 +1,18 @@
 #!/usr/bin/python
 
+# NAME: PYNESSUSASSET
+# DISPLAYNAME: NESSUS
+# FUNCTIONS: IMPORT
+# AUTHOR: ShadeyShades
+# DESCRIPTION: Import Nessus XML files into the standard format
+# DISABLE: TRUE
+
 # Contains the nessus import and function tests
+# In general this plugin isn't done yet.
 import re
 import xml.etree.ElementTree as ET
 
-class pyassetnessus(object):
+class nessus(object):
     def __init__(self):
         pass
     def loadnessusxml(self,file):

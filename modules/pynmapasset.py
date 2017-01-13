@@ -2,9 +2,10 @@
 
 # NAME: PYNMAPASSET
 # DISPLAYNAME: NMAP
-# END: BACK
+# FUNCTIONS: IMPORT,EXECUTE
 # AUTHOR: ShadeyShades
-# DESCRIPTION: Import nmap xml and execute nmap scans into standard format.
+# DESCRIPTION: Import nmap xml and execute nmap scans into standard format
+# DISABLE: FALSE
 
 ######################
 # Name: pynmap.py
@@ -16,7 +17,7 @@ import re
 import xml.etree.ElementTree as ET
 
 
-class pyassetnmap(object):
+class nmap(object):
     def __init__(self):
         # Dont have anything for here yet.
         pass
@@ -28,13 +29,13 @@ class pyassetnmap(object):
     # Output:       nmapxml - Object of the NMap XML file
     ######################
 
-    def loadnmapxml(self, file):
+    def loadnmapxml(self, filename):
         # Validate the file being passed to us matches our naming scheme
         if not re.match(r'^NMAP\_(?:[0-9]{1,3}\.){3}[0-9]{1,3}_[0-9]{20}\.(xml|nmap)$',file):
             return
         # Validate the file headers are what we expect and that the file isn't too long.
         try:
-            with open(file,'r') as nmapfile:
+            with open(filename,'r') as nmapfile:
                 counter = 0
                 nmaplist = nmapfile.readlines()
                 for line in nmaplist:
@@ -51,7 +52,7 @@ class pyassetnmap(object):
                         return
                     elif counter > 10000:
                         print("ImportNmapXML: Critical: Too many results in file!")
-                        return
+                        break
                 nmapfile.close()
         except Exception as err:
             print("loadnmapxml: ERROR: While validating XML file, following error happened: %s" % err)

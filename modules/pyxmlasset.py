@@ -2,9 +2,10 @@
 
 # NAME: XMLASSET
 # DISPLAYNAME: XML
-# END: FRONT
+# FUNCTIONS: EXPORT
 # AUTHOR: ShadeyShades
 # DESCRIPTION: A Class which allows us to take dictionaries and export them as xml
+# DISABLE: FALSE
 
 class pyxmlasset(object):
     def __init__(self):

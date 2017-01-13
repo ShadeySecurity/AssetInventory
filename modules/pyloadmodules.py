@@ -7,10 +7,10 @@ from gluon import *
 
 # NAME: name of the moduke
 # DISPLAYNAME: What to display the module to user as
-# END: FRONT or BACK (Front end is something needed by a web2py page, backend is used to process data
+# FUNCTIONS: ADMIN
 # AUTHOR: Who do we give credit to
 # DESCRIPTION: What is the description of this module
-
+# DISABLE: TRUE
 
 # Note each class must return a dictionary which matches the standard format found in our github wiki
 
@@ -38,11 +38,13 @@ def find_modules(modpath):
                 continue
             elif not re.match(r'^\#\sDISPLAYNAME\:\s[A-Za-z0-9 ]*(\s)?$', filelines[3]):
                 continue
-            elif not re.match(r'^\#\sEND\:\s(FRONT|BACK)(\s)?$', filelines[4]):
+            elif not re.match(r'^\#\sFUNCTIONS\:\s((EXPORT|IMPORT|ADMIN|EXECUTE)(\,)?){1,4}$', filelines[4]):
                 continue
             elif not re.match(r'^\#\sAUTHOR\:\s[\w\s]*$', filelines[5]):
                 continue
             elif not re.match(r'^\#\sDESCRIPTION\:\s[\w\s]*$', filelines[6]):
+                continue
+            elif not re.match(r'^\#\sDISABLE\:\s(FALSE|TRUE)(\s)?$', filelines[7]):
                 continue
             else:
                 reg = re.search(r'^\#\sNAME\:\s([A-Za-z0-9]*)(\s)?$', filelines[2])
@@ -51,14 +53,19 @@ def find_modules(modpath):
                 reg = re.search(r'^\#\sDISPLAYNAME\:\s[A-Za-z0-9 ]*(\s)?$', filelines[3])
                 modulelist[modname]['DISPLAYNAME'] = str(reg.group(0))
                 reg = re.search(r'^\#\sEND\:\s(FRONT|BACK)(\s)?$', filelines[4])
-                modulelist[modname]['END'] = str(reg.group(0))
+                modulelist[modname]['FUNCTIONS'] = str(reg.group(0)).split(',')
                 reg = re.search(r'^\#\sAUTHOR\:\s[\w\s]*$', filelines[5])
                 modulelist[modname]['AUTHOR'] = str(reg.group(0))
                 reg = re.search(r'^\#\sDESCRIPTION\:\s[\w\s]*$', filelines[6])
                 modulelist[modname]['DESCRIPTION'] = str(reg.group(0))
+                reg = re.search(r'^\#\sDISABLE\:\s(FALSE|TRUE)(\s)?$', filelines[7])
+                if str(reg.group(0)) == "FALSE":
+                    modulelist[modname]['DISABLE'] = False
+                else:
+                    modulelist[modname]['DISABLE'] = True
     return modulelist
 
-def loadmodules(modulelist):
+def load_modules(modulelist):
     import importlib
     if type(modulelist) is not dict:
         return
