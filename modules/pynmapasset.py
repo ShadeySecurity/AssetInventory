@@ -9,7 +9,7 @@
 
 ######################
 # Name: pynmap.py
-# Description:  A helper class which allows us to ingest, read, and convert NMap XML files/objects.
+# Description:  A module which allows us to ingest, read, and convert NMap XML files/objects.
 # Authors: ShadeyShades
 ######################
 
@@ -29,7 +29,7 @@ class nmap(object):
     # Output:       nmapxml - Object of the NMap XML file
     ######################
 
-    def loadnmapxml(self, filename):
+    def import_nmapxml(self, filename):
         # Validate the file being passed to us matches our naming scheme
         if not re.match(r'^NMAP\_(?:[0-9]{1,3}\.){3}[0-9]{1,3}_[0-9]{20}\.(xml|nmap)$',file):
             return
