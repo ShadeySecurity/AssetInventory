@@ -146,21 +146,21 @@ ourtime = datetime.utcnow()
 # Custom Databases
 # Reference https://github.com/ShadeySecurity/pyAssetInventory/wiki/Database-Structure
 
-db.define_table('scans', Field('username', db.auth_user, default=auth.user_id, writable=False, requires=IS_NOT_EMPTY()),
-                Field('scan_type','string', requires=IS_IN_SET(['nessus', 'nmap', 'powershell', 'openvas', 'ssh','csv'])),
-                Field('network','string', default='127.0.0.1/32',requires=IS_NOT_EMPTY()),
+db.define_table('scans', Field('user_name', db.auth_user, default=auth.user_id, writable=False, requires=IS_NOT_EMPTY()),
+                Field('scan_type','string', requires=IS_IN_SET(['nessus', 'nmap', 'powershell', 'openvas', 'ssh','import','other'])),
+                Field('network','list:string', default='127.0.0.1/32',requires=IS_NOT_EMPTY()),
                 Field('command','string'),
                 Field('task_id', 'string'),
                 Field('description','text'),
                 Field('justification','text', requires=IS_NOT_EMPTY()),
                 Field('approver','string'),
                 Field('date_timestamp','date', default=ourtime,writable=False, requires=IS_NOT_EMPTY()),
-                Field('scanner_ip', 'string',default='127.0.0.1', requires=IS_NOT_EMPTY()),
-                Field('user_ip','string', default='127.0.0.1')
+                Field('scanner_ip', 'string',default='127.0.0.1', requires=IS_IPV4()),
+                Field('user_ip','string', default='127.0.0.1',requires=IS_IPV4())
                 )
 
 db.define_table('hosts',
-                Field('ip', 'string', requires=IS_NOT_EMPTY()),
+                Field('ip', 'string', requires=IS_IPV4()),
                 Field('netmask', 'string'),
                 Field('mac', 'string', requires=IS_NOT_EMPTY()),
                 Field('vendor', 'string'),
@@ -170,21 +170,21 @@ db.define_table('hosts',
                 Field('distance', 'integer', default=1, requires=IS_NOT_EMPTY()),
                 Field('rtt', 'integer',  default=1, requires=IS_NOT_EMPTY()),
                 Field('scan_id', requires=IS_NOT_EMPTY()),
-                Field('host_type', requires=IS_NOT_EMPTY()),
+                Field('host_type', requires=IS_IN_SET(['server,workstation,switch,router,firewall,security,network,other'])),
                 Field('firewall_state', requires=IS_IN_SET(['on','partial','off'])),
                 singular="host",
                 plural="hosts"
                 )
 
 db.define_table('hostnames',
-                Field('ip', requires=IS_NOT_EMPTY()),
+                Field('ip', requires=IS_IPV4()),
                 Field('hostname', requires=IS_NOT_EMPTY()),
                 Field('record_type', requires=IS_NOT_EMPTY()),
                 Field('dns_source'),
                 Field('scan_id', requires=IS_NOT_EMPTY())
                 )
 db.define_table('ports',
-                Field('host_id', 'reference hosts'),
+                Field('ip', requires=IS_IPV4()),
                 Field('port', 'string', requires=IS_NOT_EMPTY()),
                 Field('protocol', 'string', default='tcp', requires=IS_NOT_EMPTY()),
                 Field('service', 'string', default='unk', requires=IS_NOT_EMPTY()),
@@ -196,14 +196,16 @@ db.define_table('ports',
 
 
 db.define_table('software',
-                Field('ip', 'string', requires=IS_NOT_EMPTY()),
+                Field('ip', 'string', requires=IS_IPV4()),
                 Field('software_name', 'string', requires=IS_NOT_EMPTY()),
                 Field('software_version', 'string', requires=IS_NOT_EMPTY()),
                 Field('install_user', 'string'),
                 Field('install_date', 'string'),
                 Field('scan_id', 'string', requires=IS_NOT_EMPTY())
                 )
-db.define_table('software_auth', Field('software_vendor'),
+db.define_table('software_auth',
+                Field('ip', requires=IS_IPV4()),
+                Field('software_vendor'),
                 Field('software_name', requires=IS_NOT_EMPTY()),
                 Field('software_version', requires=IS_NOT_EMPTY()),
                 Field('auth_uid', requires=IS_NOT_EMPTY()),
@@ -215,30 +217,32 @@ db.define_table('software_auth', Field('software_vendor'),
                 Field('description','text')
                 )
 
-db.define_table('vulnerabilities', Field('software_vendor'),
+db.define_table('vulnerabilities', 
+                Field('software_vendor'),
                 Field('software_name','string', requires=IS_NOT_EMPTY()),
                 Field('software_version', requires=IS_NOT_EMPTY()),
                 Field('os', requires=IS_NOT_EMPTY()),
                 Field('os_version', requires=IS_NOT_EMPTY()),
                 Field('cve',requires=IS_NOT_EMPTY()),
-                Field('ip', requires=IS_NOT_EMPTY()),
+                Field('ip',requires=IS_IPV4()),
                 Field('criticality', requires=IS_IN_SET(['Critical','High','Medium','Low'])),
                 Field('scan_id', requires=IS_NOT_EMPTY()),
                 Field('description')
                 )
 
-db.define_table('hops', Field('ip', requires=IS_NOT_EMPTY()),
+db.define_table('hops', 
+                Field('ip', requires=IS_IPV4()),
                 Field('hostname'),
-                Field('scanner_ip', requires=IS_NOT_EMPTY()),
-                Field('dst_ip', requires=IS_NOT_EMPTY()),
+                Field('scanner_ip', rrequires=IS_IPV4()),
+                Field('dst_ip', requires=IS_IPV4()),
                 Field('rtt', requires=IS_NOT_EMPTY()),
                 Field('ttl', requires=IS_NOT_EMPTY()),
                 Field('scan_id', requires=IS_NOT_EMPTY())
                 )
 
 db.define_table('interfaces',
-                Field('ip', requires=IS_NOT_EMPTY()),
-                Field('interface', requires=IS_NOT_EMPTY()),
+                Field('ip', requires=IS_IPV4()),
+                Field('interfaces','list:string', requires=IS_NOT_EMPTY()),
                 Field('description'),
                 Field('speed'),
                 Field('interface_network'),
@@ -246,7 +250,8 @@ db.define_table('interfaces',
                 Field('port_type'),
                 Field('host_type'),
                 Field('scan_id', requires=IS_NOT_EMPTY()),
-                Field('next_device')
+                Field('next_device'),
+                Field('fw_rules','list:strings', requires=IS_NOT_EMPTY())
                 )
 db.define_table('vlans',
                 Field('vlan_id', requires=IS_NOT_EMPTY()),
@@ -265,6 +270,7 @@ db.define_table('routes',
                 )
 
 db.define_table('host_users',
+                Field('ip', requires=IS_IPV4()),
                 Field('username', requires=IS_NOT_EMPTY()),
                 Field('creation_date'),
                 Field('privilege_level', requires=IS_NOT_EMPTY()),
@@ -272,18 +278,20 @@ db.define_table('host_users',
                 )
 
 db.define_table('auth_groups',
+                Field('ip', requires=IS_IPV4()),
                 Field('group_name', requires=IS_NOT_EMPTY()),
-                Field('username'),
+                Field('members', 'list:strings'),
                 Field('creation_date'),
                 Field('scan_id')
                 )
 
 db.define_table('fw_acl',
+                Field('ip', requires=IS_IPV4()),
                 Field('rule_name'),
-                Field('traffic_action', requires=IS_IN_SET(['deny','accept','reject'])),
+                Field('action', requires=IS_IN_SET(['deny','accept','reject'])),
                 Field('src_net', requires=IS_NOT_EMPTY()),
                 Field('dst_net', requires=IS_NOT_EMPTY()),
-                Field('interface', requires=IS_NOT_EMPTY()),
+                Field('interface', requires=IS_IN_SET(['all','some'])),
                 Field('src_port', requires=IS_NOT_EMPTY()),
                 Field('dst_port', requires=IS_NOT_EMPTY()),
                 Field('protocol', requires=IS_IN_SET(['tcp','udp','icmp'])),
@@ -295,5 +303,38 @@ db.define_table('fw_acl',
                 Field('description', 'text', requires=IS_NOT_EMPTY()),
                 Field('logged', 'boolean', default=False, requires=IS_NOT_EMPTY()),
                 Field('other_args', requires=IS_NOT_EMPTY()),
-                Field('scan_id', requires=IS_NOT_EMPTY())
+                Field('scan_id', requires=IS_NOT_EMPTY()),
+                Field('rule_type', default="extended", requires=IS_IN_SET(['standard','extended','nextgen','ids']))
                 )
+db.define_table('root_helper',
+                Field('scan_id','string',requires=IS_NOT_EMPTY()),
+                Field('scan_type','string', requires=IS_NOT_EMPTY()),
+                Field('in_file_path','string', requires=IS_NOT_EMPTY()),
+                Field('out_file_path','string', requires=IS_NOT_EMPTY()),
+                Field('date_stamp','string', requires=IS_NOT_EMPTY())
+                )
+db.define_table('ssids',
+                Field('name','string',requires=IS_NOT_EMPTY()),
+                Field('hidden','boolean',default=False,requires=IS_NOT_EMPTY()),
+                Field('vlan','string',default="1"),
+                Field('auth_method','string',default="open",requiers=IS_IN_SET(['open','wep','wpa','wpa2-personal','wpa2-enterprise'])),
+                Field('auth_options','list:string'),
+                Field('scan_id', 'string', requires=IS_NOT_EMPTY()),
+                Field('ip', requires=IS_IPV4())
+                )
+db.define_tables('auth_server',
+                 Field('hostname','string'),
+                 Field('ip','string', requires=IS_IPV4()),
+                 Field('auth_port'),
+                 Field('acct_port'),
+                 Field('additional_ports','list:strings'),
+                 Field('auth_types', 'list:strings', requires=IS_IN_SET(['ldap','ldaps','radius','ad','other']), default="other")
+                 )
+# the password should be encrypted. There is a helper function to do this (encrypt_helper.py).
+db.define_tables('dist_systems',
+                 Field('ip',requires=IS_IPV4()),
+                 Field('conn_opt', 'list:strings', requires=IS_IN_SET(['ssh','ps','.net','nc','smb','psexec','http','https','other'])),
+                 Field('description','text'),
+                 Field('username','string'),
+                 Field('password','string')
+                 )

@@ -20,7 +20,8 @@ accesslistreg = re.compile(r'^access\-list\s(?P<name>([\d]*)|(.*))(\s)?(?P<aclty
                            r'(?P<log>log))?(\s)?((?P<dst_sub3>(?:[0-9]{1,3}\.){3}255)|(eq\s(?P<port2>.*)))?')
 class cisco(object):
     def __init__(self):
-        pass
+        # TODO: build the field here once abstraction layer is done
+        self.executefields = {}
     def import_ciscoconfig(self,file):
         if not type(file) is str:
             return
@@ -38,23 +39,25 @@ class cisco(object):
         if not type(ciscoobj) is list:
             print("ciscoobj:Critical: The cisco object expected is a list of the line of a cisco config.")
             return
-        ciscodict = {'os':'cisco ios'}
-        ciscodict['scan'] = {'type':'cisco'}
+        ciscodict = {'127.0.0.1':{'hosts':{'vendor':'cisco'}, 'fw_acl':{}, 'hostnames':{}, 'host_users':{}, 'vlans':{}, 'routes':{}, 'interfaces':{}}}
         counter = 0
-        ciscodict['access-list'] = {}
         for line in ciscoobj:
             counter += 1
             if re.match(r'^access-list',line):
                 results = accesslistreg.search(line)
                 name = results.group('name')
-                if not ciscodict['access-list'][name]:
-                    ciscodict['access-list'][name] = {}
-                    ciscodict['access-list'][name]['results'] =[]
+                ciscodict['127.0.0.1']['fwl_acl'].update({'rule_name': name})
                 acltype = results.group('acltype')
-                ciscodict['access-list'][name]['acl-type'] = acltype
+                ciscodict['127.0.0.1']['fwl_acl'].update({'rule_type': acltype})
                 action = results.group('action')
-                #TODO Finish this break out stuff here later
-                ciscodict['access-list'][name]['results'].append({'action': action, 'src_net': srcnet, 'dst_net': dstnet, 'args': args})
+                ciscodict['127.0.0.1']['fwl_acl'].update({'action': action})
+                # Unlike above, there are multiple possible names for the same thing due to the weird regex needed for cisco acls
+                ciscodict['127.0.0.1']['fwl_acl'].update({'src_net': results.group('src_host')+"/32"})                  
+                if results.group('src_netany') == "any":
+                    ciscodict['127.0.0.1']['fwl_acl'].update({'src_net': '0.0.0.0/0'})
+                
+                ciscodict['127.0.0.1']['fwl_acl'].update({'src_net': results.group('
+                                                                                   : srcnet, 'dst_net': dstnet, 'args': args})
                 child = ""
                 childcounter = counter
                 while not child == "!":

@@ -66,12 +66,11 @@ def call():
     """
     return service()
 
-
-
-
+# These next 2 might be moved to the reports controller at some point
 def network_map():
     #TODO: Create a network map based on hops database!
     pass
+
 @auth.requires_login()
 @auth.requires_membership('auditor')
 def review_scans():
