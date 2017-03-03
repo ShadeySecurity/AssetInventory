@@ -76,35 +76,3 @@ def network_map():
 def review_scans():
     #TODO: Create a page which essentially just dumps the scans database out in a sql smart grid (use web2py built in)
     pass
-
-# Below are all database editing pages.
-@auth.requires_login()
-@auth.requires_membership('editor')
-def edit_hosts():
-    # TODO: SQL smartgrid for hosts database
-    pass
-@auth.requires_login()
-@auth.requires_membership('editor')
-def edit_vulnerabilities():
-    pass
-@auth.requires_login()
-@auth.requires_membership('editor')
-def edit_ports():
-    pass
-@auth.requires_login()
-@auth.requires_membership('editor')
-def edit_softauth():
-    pass
-@auth.requires_login()
-@auth.requires_membership('editor')
-def edit_software():
-    pass
-@auth.requires_login()
-@auth.requires_membership('editor')
-def edit_hops():
-    grid = SQLFORM.smartgrid(db.hops, headers={'hops.ip': 'Hop IP', 'hops.hostname': 'Hop Hostname',
-                                                  'hops.scanner_ip': 'Origin Host IP',
-                                                  'hops.dst_ip': 'Target IP', 'hops.rtt': 'Time to Hop Host (RTT)',
-                                                  'hops.ttl': 'Distance from Origin (TTL)'})
-
-    return dict(form=form)
