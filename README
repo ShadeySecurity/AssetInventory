@@ -1,23 +1,23 @@
-= Authors =
+# Contributors 
 * SpecialK
 * ShadeyShades
 
-Version: 0.2
-= INSTALL =
+# Version: 0.3
+## INSTALL 
 1. Optional: Install Apache (http://web2py.com/books/default/chapter/29/13/deployment-recipes#Apache-setup)
 2. Run install script in ./scripts
 3. Start Web2py or Apache!
 4. Sit back, and enjoy the fruits of your hard work.
 
-= Operational Status =
+## Operational Status 
 Does the current build actually run / compile?
 [NO] Master
 [NO] DEV
 
-= LICENSE =
+# LICENSE 
 Please see the standard license for Shadey Security included in this package,
-which prohibits commercial use of this product without paid license, with a few exceptions.
+which prohibits commercial use of this product without paid license, with a few exceptions, but allows for personal use with certain stipulations.
 
-= More Info =
+# More Info 
 Check out our wiki... we're adding to it all the time!
 https://github.com/ShadeySecurity/pyAssetInventory/wiki
