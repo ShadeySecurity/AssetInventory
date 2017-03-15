@@ -219,8 +219,7 @@
   tasks:
     - name: Final Steps of Web2py
       shell: |
-        python -c "from gluon.widget import console; console();"
-        python -c "from gluon.main import save_password; save_password('$password',443)"
+        python -c "from gluon.widget import console; console(); from gluon.main import save_password; save_password('$admpass',443);"
       args:
         executable: /bin/bash
   vars_prompt:
@@ -230,4 +229,22 @@
       encrypt: "sha512_crypt"
       confirm: yes
       salt_size: 12
-      
+##### Setup Helper Scripts ############
+- hosts: local
+  become: yes
+  become_method: sudo
+  gather_facts: False
+  tasks:
+    - name: Move ExecRootHelper To Cron
+      file:
+        src: /var/www/web2py/applications/pyAssetContext/scripts/execute_root_helper.py
+        dest: /etc/cron.d/execute_root_helper.py
+        owner: root
+        group: root
+        mode: 0555
+    - name: Enable helper in Cron
+      cron:
+        name: "Run EXECROOT Helper"
+        minute: "*/1"
+        job: "/etc/cron.d/execute_root_helper.py"
+        
