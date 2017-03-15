@@ -52,7 +52,11 @@
         - python-openssl
   - name: install python libs
     pip:
-      name: gluon
+      name: "{{ item }}"
+    with_items:
+      - pip
+      - gluon
+      - passlib
 ################ configure postgresql ################
 - hosts: local
   become: yes
@@ -60,13 +64,19 @@
   become_user: postgres
   gather_facts: False
   vars:
-    dbname: pyapp
-    dbpassword: '!$3curityPr0j3ct!'
+    dbname: pyAssetContext
+  vars_prompt:
+    - name: "dbpassword"
+      prompt: "Enter database user password: "
+      private: yes
+      encrypt: "sha512_crypt"
+      confirm: yes
+      salt_size: 15    
   tasks:
   - name: create database pyapp
     action: postgresql_db db=$dbname
   - name: ensure user pyapp has access to database
-    action: postgresql_user db=$dbname user=pyapp password=$dbpassword priv=ALL
+    action: postgresql_user db=$dbname user=$dbname password=$dbpassword priv=ALL
 ################# install web2py ###################
 - hosts: local
   become: yes
@@ -214,7 +224,11 @@
         python -c "from gluon.main import save_password; save_password('$password',443)"
       args:
         executable: /bin/bash
-      vars_prompt:
-        - name: "password"
-          prompt: "What would you like to be the admin password? "
+  vars_prompt:
+    - name: "admpass"
+      prompt: "Enter password2"
+      private: yes
+      encrypt: "sha512_crypt"
+      confirm: yes
+      salt_size: 12
       
