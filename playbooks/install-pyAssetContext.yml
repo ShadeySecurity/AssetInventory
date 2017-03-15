@@ -211,7 +211,10 @@
     - name: Final Steps of Web2py
       shell: |
         python -c "from gluon.widget import console; console();"
-        python -c "from gluon.main import save_password; save_password('!ch@ng3M3!',443)"
+        python -c "from gluon.main import save_password; save_password('$password',443)"
       args:
         executable: /bin/bash
+      vars_prompt:
+        - name: "password"
+          prompt: "What would you like to be the admin password? "
       
