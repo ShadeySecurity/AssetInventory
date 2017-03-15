@@ -3,8 +3,7 @@
 - hosts: local
   become: True
   become_method: sudo
-  gather_facts: False
-  
+  gather_facts: False  
   tasks:
   - name: add user admin
     user: name=admin state=present groups=sudo
