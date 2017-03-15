@@ -145,77 +145,79 @@
   become_method: sudo
   become_user: www-data
   gather_facts: False
-  - name: Generate Apache private SSL Key
-    openssl_privatekey:
-      force: False
-      path: /etc/apache2/ssl/shadey_apache.pem
-      size: 4096
-      state: present
-  - name: Generate Apache public SSL Key
-    openssl_publickey:
-      force: False
-      path: /etc/apache2/ssl/shadey_apache.crt  
-      privatekey_path: /etc/apache2/ssl/shadey_apache.pem
-      state: present
+  tasks:
+    - name: Generate Apache private SSL Key
+      openssl_privatekey:
+        force: False
+        path: /etc/apache2/ssl/shadey_apache.pem
+        size: 4096
+        state: present
+    - name: Generate Apache public SSL Key
+      openssl_publickey:
+        force: False
+        path: /etc/apache2/ssl/shadey_apache.crt  
+        privatekey_path: /etc/apache2/ssl/shadey_apache.pem
+        state: present
 
 ### BAck to what we were doing ####
 - hosts: local
   become: yes
   become_method: sudo
   gather_facts: False
-  - name: disable default sites
-    file:
-      path: /etc/apache2/sites-enabled
-      state: absent
-      force: yes
-  - name: re-create sites-enabled
-    file:
-      path: /etc/apache2/sites-enabled  
-      owner: www-data
-      group: www-data
-      mode: 0755
-  - name: copy our template file
-    file:
-      src: /var/www/web2py/applications/pyAssetContext/conf/default.conf
-      dest: /etc/apache2/sites-available/default.conf
-      owner: www-data
-      group: www-data
-      mode: 0555
-      force: True
-  - name: enable apache site
-    command: "a2ensite default.conf"
-  - name: PAM Me step1
-    file:
-      src: /etc/apache2/mods-available/authnz_external.load
-      dest: /etc/apache2/mods-enabled
-      state: link
-      owner: www-data
-      group: www-data
-  - name: PAM Me step 2
-    file: 
-      src: /etc/pam.d/apache2
-      dest: /etc/pam.d/httpd
-      state: link
-  - name: PAM user creation
-    user:
-      append: yes
-      group: shadow
-      name: www-data
-  - name: Restart Apache
-    service:
-      name: apache2
-      state: restarted
+  tasks:
+    - name: disable default sites
+      file:
+        path: /etc/apache2/sites-enabled
+        state: absent
+        force: yes
+    - name: re-create sites-enabled
+      file:
+        path: /etc/apache2/sites-enabled  
+        owner: www-data
+        group: www-data
+        mode: 0755
+    - name: copy our template file
+      file:
+        src: /var/www/web2py/applications/pyAssetContext/conf/default.conf
+        dest: /etc/apache2/sites-available/default.conf
+        owner: www-data
+        group: www-data
+        mode: 0555
+        force: True
+    - name: enable apache site
+      command: "a2ensite default.conf"
+    - name: PAM Me step1
+      file:
+        src: /etc/apache2/mods-available/authnz_external.load
+        dest: /etc/apache2/mods-enabled
+        state: link
+        owner: www-data
+        group: www-data
+    - name: PAM Me step 2
+      file: 
+        src: /etc/pam.d/apache2
+        dest: /etc/pam.d/httpd
+        state: link
+    - name: PAM user creation
+      user:
+        append: yes
+        group: shadow
+        name: www-data
+    - name: Restart Apache
+      service:
+        name: apache2
+        state: restarted
   
 ## Finish up web2py setup
-- hosts: local
-  become: yes
-  become_method: sudo
-  become_user: www-data
-  gather_facts: False
-  - name: Final Steps of Web2py
-    shell:  |
-      from gluon.widget import console; console();
-      from gluon.main import save_password; save_password(raw_input('admin password: '),443)
-    args:
-      executable: /usr/bin/python
+  - hosts: local
+    become: yes
+    become_method: sudo
+    become_user: www-data
+    gather_facts: False
+    - name: Final Steps of Web2py
+      shell:  |
+        from gluon.widget import console; console();
+        from gluon.main import save_password; save_password(raw_input('admin password: '),443)
+      args:
+        executable: /usr/bin/python
       
