@@ -98,7 +98,7 @@
         force: yes
     - name: remove default welcome
       file:
-        path: /www/web2py/applications/welcome
+        path: /var/www/web2py/applications/welcome
         state: absent
     - name: Grab Shadey Security Home Portal Page Project from github
       git:
