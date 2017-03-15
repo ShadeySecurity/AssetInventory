@@ -1,0 +1,106 @@
+################### add users ############################
+--- 
+- hosts: local
+  become: True
+  become_method: sudo
+  gather_facts: False  
+  tasks:
+  - name: add user admin
+    user: name=admin state=present groups=sudo
+  - name: add user pyapp
+    user: name=pyapp state=present
+################# install software #######################
+- hosts: local
+  become: True
+  become_method: sudo
+  gather_facts: False
+  tasks:
+  - name: ensure apt cache is up to date
+    action: apt update_cache=yes
+  - name: install required packages
+    action: apt pkg="{{ item }}"
+    with_items:
+        - ssh
+        - zip
+        - unzip
+        - tar
+        - openssh-server
+        - pwauth
+        - build-essential
+        - ipython
+        - python
+        - python-dev
+        - python-pip
+        - git
+        - python-psycopg2 
+        - postfix
+        - wget
+        - python-matplotlib
+        - python-reportlab
+        - mercurial
+        - emacs
+        - libapache2-mod-wsgi
+        - postgresql
+        - libpq-dev
+        - python-psycopg2
+        - unzip
+        - fail2ban
+        - python-openssl
+  - name: install python libs
+    pip:
+      name: "{{ item }}"
+    with_items:
+      - pip
+      - gluon
+      - passlib
+
+################# install web2py ###################
+- hosts: local
+  become: yes
+  become_method: sudo
+  gather_facts: False
+  tasks:
+    - name: pull web2py from github
+      git:
+        repo: https://github.com/web2py/web2py.git
+        dest: /opt/web2py
+        update: yes
+        force: yes
+########### install Shadey Security Modules ########
+    - name: checkout pyassetcontext code from github
+      git:
+        repo: https://github.com/ShadeySecurity/pyAssetContext.git
+        dest: /opt/web2py/applications/pyAssetContext
+        accept_hostkey: yes
+        ssh_opts: "-o StrictHostKeyChecking=no"
+        force: yes
+    - name: remove default welcome
+      file:
+        path: /opt/web2py/applications/welcome
+        state: absent
+    - name: Grab Shadey Security Home Portal Page Project from github
+      git:
+        repo: https://github.com/ShadeySecurity/PortalHome.git
+        dest: /opt/web2py/applications/welcome
+        force: yes
+        accept_hostkey: yes
+        ssh_opts: "-o StrictHostKeyChecking=no"
+
+##### Setup Helper Scripts ############
+- hosts: local
+  become: yes
+  become_method: sudo
+  gather_facts: False
+  tasks:
+    - name: Move ExecRootHelper To Cron
+      file:
+        src: /opt/web2py/applications/pyAssetContext/scripts/execute_root_helper.py
+        dest: /etc/cron.d/execute_root_helper.py
+        owner: root
+        group: root
+        mode: 0555
+    - name: Enable helper in Cron
+      cron:
+        name: "Run EXECROOT Helper"
+        minute: "*/1"
+        job: "/etc/cron.d/execute_root_helper.py"
