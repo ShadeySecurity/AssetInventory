@@ -1,23 +1,20 @@
 ################### add users ############################
----
+--- 
 - hosts: local
   become: True
   become_method: sudo
   gather_facts: False
   
   tasks:
-  - name: add user admin 
+  - name: add user admin
     user: name=admin state=present groups=sudo
-
   - name: add user pyapp
     user: name=pyapp state=present
-
 ################# install software #######################
 - hosts: local
   become: True
   become_method: sudo
   gather_facts: False
-
   tasks:
   - name: ensure apt cache is up to date
     action: apt update_cache=yes
@@ -36,10 +33,10 @@
         - python-dev
         - python-pip
         - git
-        - apache
+        - apache2
         - libapache2-mod-security2
         - libapache2-mod-evasive
-        - python2.5-psycopg2
+        - python-psycopg2 
         - postfix
         - wget
         - python-matplotlib
@@ -52,113 +49,108 @@
         - python-psycopg2
         - unzip
         - fail2ban
-        - python-pyOpenSSL
-
+        - python-openssl
+  - name: install python libs
+    pip:
+      name: gluon
 ################ configure postgresql ################
 - hosts: local
   become: yes
   become_method: sudo
   become_user: postgres
   gather_facts: False
-
   vars:
     dbname: pyapp
-    dbpassword: '!$3curityPr0j3ct!' 
-
+    dbpassword: '!$3curityPr0j3ct!'
   tasks:
   - name: create database pyapp
     action: postgresql_db db=$dbname
-
   - name: ensure user pyapp has access to database
     action: postgresql_user db=$dbname user=pyapp password=$dbpassword priv=ALL
-
 ################# install web2py ###################
 - hosts: local
   become: yes
   become_method: sudo
   gather_facts: False
-
   tasks:
-  - name: pull web2py from github
-    git:
-      repo: https://github.com/web2py/web2py.git
-      dest: /var/www/web2py
-      update: yes
-      force: yes
-
+    - name: pull web2py from github
+      git:
+        repo: https://github.com/web2py/web2py.git
+        dest: /var/www/web2py
+        update: yes
+        force: yes
 ########### install Shadey Security Modules ########
-  - name: checkout pyassetcontext code from github
-    git:
-      repo: https://github.com/ShadeySecurity/pyAssetContext.git
-      dest: /var/www/web2py/applications/pyAssetContext
-      accept_hostkey: yes
-      ssh_opts: "-o StrictHostKeyChecking=no"
-      force: yes
-
-  - name: remove default welcome
-    file: 
-      path: /www/web2py/applications/welcome
-      state: absent
-
-  - name: Grab Shadey Security Home Portal Page Project from github
-    git:
-      repo: https://github.com/ShadeySecurity/PortalHome.git
-      dest: /var/www/web2py/applications/welcome
-      force: yes
-      accept_hostkey: yes
-      ssh_opts: "-o StrictHostKeyChecking=no"
-
+    - name: checkout pyassetcontext code from github
+      git:
+        repo: https://github.com/ShadeySecurity/pyAssetContext.git
+        dest: /var/www/web2py/applications/pyAssetContext
+        accept_hostkey: yes
+        ssh_opts: "-o StrictHostKeyChecking=no"
+        force: yes
+    - name: remove default welcome
+      file:
+        path: /www/web2py/applications/welcome
+        state: absent
+    - name: Grab Shadey Security Home Portal Page Project from github
+      git:
+        repo: https://github.com/ShadeySecurity/PortalHome.git
+        dest: /var/www/web2py/applications/welcome
+        force: yes
+        accept_hostkey: yes
+        ssh_opts: "-o StrictHostKeyChecking=no"
 ########### Configure Web2py #############
-  - name: change ownership of /var/www/web2py dir 
-    file: 
-      path: /var/www/web2py
-      owner: www-data
-      group: www-data
-      mode: 0755
-      recurse: yes
-  - name: Apache Modules Setup
-    apache2_module:
-      state: present
-      name: "{{ item }}"
-    with_items:
-      - ssl
-      - proxy
-      - proxy_http
-      - headers
-      - expires
-      - wsgi
-      - rewrite
-      - security2
-      - evasive
-  - name: Apache Prod Enable
-    lineinfile:
-      path: /etc/apache2/apache2.conf
-      regexp: "{{ item.regex }}"
-      line: "{{ item.line }}"
-    with_items:
-      - { regex: "ServerSignature", line: "ServerSignature Off" }
-      - { regex: "ServerTokens", line: "ServerTokens Prod" }
+    - name: change ownership of /var/www/web2py dir
+      file:
+        path: /var/www/web2py
+        owner: www-data
+        group: www-data
+        mode: 0755
+        recurse: yes
+    - name: Apache Modules Setup
+      apache2_module:
+        state: present
+        name: "{{ item }}"
+      with_items:
+        - ssl
+        - proxy
+        - proxy_http
+        - headers
+        - expires
+        - wsgi
+        - rewrite
+        - security2
+        - evasive
+      ignore_errors: yes
+    - name: Apache Prod Enable
+      lineinfile:
+        name: /etc/apache2/apache2.conf
+        regexp: ServerSignature
+        line: ServerSignature Off
+    - name: Apache Prod Enable2
+      lineinfile:
+        name: /etc/apache2/apache2.conf
+        regexp: ServerTokens
+        line: ServerTokens Prod
 
 #### GENERATE KEYS FOR APACHE INTERUPTION ####
-- hosts: local
-  become: yes
-  become_method: sudo
-  become_user: www-data
-  gather_facts: False
-  tasks:
-    - name: Generate Apache private SSL Key
-      openssl_privatekey:
-        force: False
-        path: /etc/apache2/ssl/shadey_apache.pem
-        size: 4096
-        state: present
-    - name: Generate Apache public SSL Key
-      openssl_publickey:
-        force: False
-        path: /etc/apache2/ssl/shadey_apache.crt  
-        privatekey_path: /etc/apache2/ssl/shadey_apache.pem
-        state: present
-
+#- hosts: local
+#  become: yes
+#  become_method: sudo
+#  become_user: www-data
+#  gather_facts: False
+#  tasks:
+#    - name: Generate SSL Key
+#      openssl_privatekey:
+#        force: False
+#        path: /etc/apache2/ssl/shadey_apache.pem
+#        size: 4096
+#        state: present
+#    - name: Generate Apache public SSL Key
+#      openssl_publickey:
+#        force: False
+#        path: /etc/apache2/ssl/shadey_apache.crt
+#        privatekey_path: /etc/apache2/ssl/shadey_apache.pem
+#        state: present
 ### BAck to what we were doing ####
 - hosts: local
   become: yes
@@ -172,10 +164,11 @@
         force: yes
     - name: re-create sites-enabled
       file:
-        path: /etc/apache2/sites-enabled  
+        path: /etc/apache2/sites-enabled
         owner: www-data
         group: www-data
         mode: 0755
+        state: directory
     - name: copy our template file
       file:
         src: /var/www/web2py/applications/pyAssetContext/conf/default.conf
@@ -189,15 +182,15 @@
     - name: PAM Me step1
       file:
         src: /etc/apache2/mods-available/authnz_external.load
-        dest: /etc/apache2/mods-enabled
+        dest: /etc/apache2/mods-enabled/authnz_external.load
         state: link
         owner: www-data
         group: www-data
-    - name: PAM Me step 2
-      file: 
-        src: /etc/pam.d/apache2
-        dest: /etc/pam.d/httpd
-        state: link
+#    - name: PAM Me step 2
+#      file:
+#        src: /etc/pam.d/apache2
+#        dest: /etc/pam.d/httpd
+#        state: link
     - name: PAM user creation
       user:
         append: yes
@@ -209,15 +202,16 @@
         state: restarted
   
 ## Finish up web2py setup
-  - hosts: local
-    become: yes
-    become_method: sudo
-    become_user: www-data
-    gather_facts: False
+- hosts: local
+  become: yes
+  become_method: sudo
+  become_user: www-data
+  gather_facts: False
+  tasks:
     - name: Final Steps of Web2py
-      shell:  |
-        from gluon.widget import console; console();
-        from gluon.main import save_password; save_password(raw_input('admin password: '),443)
+      shell: |
+        python -c "from gluon.widget import console; console();"
+        python -c "from gluon.main import save_password; save_password('!ch@ng3M3!',443)"
       args:
-        executable: /usr/bin/python
+        executable: /bin/bash
       
