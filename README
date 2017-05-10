@@ -1,13 +1,11 @@
 # Contributors 
 * SpecialK
 * ShadeyShades
+* wasupmang
+* itredneck
 
-# Version: 0.3
-## INSTALL 
-1. Optional: Install Apache (http://web2py.com/books/default/chapter/29/13/deployment-recipes#Apache-setup)
-2. Run install script in ./scripts
-3. Start Web2py or Apache!
-4. Sit back, and enjoy the fruits of your hard work.
+# INSTALL
+See our wiki: https://github.com/ShadeySecurity/pyAssetInventory/wiki
 
 ## Operational Status 
 Does the current build actually run / compile?
